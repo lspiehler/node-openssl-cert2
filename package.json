@@ -1,0 +1,37 @@
+{
+  "dependencies": {
+    "compare-versions": "^6.1.0",
+    "jest": "^29.7.0",
+    "tmp": "^0.2.3"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "name": "node-openssl-cert2",
+  "version": "0.0.1",
+  "description": "Node.JS OpenSSL wrapper",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "lib": "lib"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lspiehler/node-openssl-cert2.git"
+  },
+  "keywords": [
+    "openssl",
+    "node.js",
+    "x509",
+    "certificates",
+    "rsa",
+    "ecc"
+  ],
+  "author": "Lyas Spiehler",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lspiehler/node-openssl-cert2/issues"
+  },
+  "homepage": "https://github.com/lspiehler/node-openssl-cert2#readme"
+}
