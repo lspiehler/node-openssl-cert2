@@ -1,5 +1,5 @@
 const node_openssl = require('../index.js');
-var openssl = new node_openssl({binpath: "C:/Program Files/OpenSSL-Win64/bin/openssl.exe"});
+var openssl = new node_openssl();
 
 test('Generate ECC keypairs. Test convert, encrypt and decrypt', async () => {
     var ecckeyoptionsa = {

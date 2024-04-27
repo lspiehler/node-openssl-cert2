@@ -9,22 +9,15 @@ let rsaoptionsa = {
     format: "PKCS1"
 }
 
-/*openssl.keypair.generateRSA(rsaoptionsa, function(err, rsa) {
+openssl.keypair.generateRSA(rsaoptionsa, function(err, rsa) {
     if(err) {
         console.log(err);
     } else {
         console.log(rsa.stdout);
-        openssl.keypair.convertToPKCS8({key: rsa.stdout, password: rsaoptionsa.encryption.password}, function(err, pkcs8) {
-            if(err) {
-                console.log(err);
-            } else {
-                console.log(pkcs8.stdout);
-            }
-        });
     }
-});*/
+});
 
-let rsaoptionsb = {
+/*let rsaoptionsb = {
     encryption: {
 		password: '!@#$%^&*()_+|}{:"?><1234567890-=][;/.,\\',
 		cipher: 'aes-256-cbc'
@@ -66,4 +59,4 @@ openssl.keypair.generateRSA({}, function(err, rsa) {
             }
         });
     }
-});
+});*/
