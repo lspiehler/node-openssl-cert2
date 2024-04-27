@@ -1,6 +1,14 @@
 const node_openssl = require('../index.js');
 var openssl = new node_openssl({debug: false, binpath: "C:/Program Files/OpenSSL-Win64/bin/openssl.exe"});
 
+openssl.keypair.listECCCurves(function(err, curves) {
+    if(err) {
+        console.log(err);
+    } else {
+        console.log(curves);
+    }
+});
+
 var ecckeyoptionsa = {
 	encryption: {
 		password: '!@#$%^&*()_+|}{:"?><1234567890-=][;/.,\\',
@@ -15,7 +23,7 @@ openssl.keypair.generateECC(ecckeyoptionsa, function(err, ecc) {
     if(err) {
         console.log(err);
     } else {
-        console.log(ecc.stdout);
+        console.log(ecc.data);
     }
 });
 
@@ -33,27 +41,27 @@ openssl.keypair.generateECC({format: 'PKCS1'}, function(err, ecc) {
     if(err) {
         console.log(err);
     } else {
-        console.log(ecc.stdout);
-        openssl.keypair.convertToPKCS8({key: ecc.stdout, password: ecckeyoptionb.encryption.password}, function(err, pkcs8) {
+        console.log(ecc.data);
+        openssl.keypair.convertToPKCS8({key: ecc.data, password: ecckeyoptionb.encryption.password}, function(err, pkcs8) {
             if(err) {
                 console.log(err);
             } else {
-                console.log(pkcs8.stdout);
-                openssl.keypair.convertECCToPKCS1({key: pkcs8.stdout, encryption: ecckeyoptionb.encryption}, function(err, pkcs1) {
+                console.log(pkcs8.data);
+                openssl.keypair.convertECCToPKCS1({key: pkcs8.data, encryption: ecckeyoptionb.encryption}, function(err, pkcs1) {
                     if(err) {
                         console.log(err);
                     } else {
-                        console.log(pkcs1.stdout);
-                        openssl.keypair.convertToPKCS8({key: pkcs1.stdout, password: ecckeyoptionb.encryption.password, decrypt: true}, function(err, pkcs8again) {
+                        console.log(pkcs1.data);
+                        openssl.keypair.convertToPKCS8({key: pkcs1.data, password: ecckeyoptionb.encryption.password, decrypt: true}, function(err, pkcs8again) {
                             if(err) {
                                 console.log(err);
                             } else {
-                                console.log(pkcs8again.stdout);
-                                openssl.keypair.convertECCToPKCS1({key: pkcs8again.stdout}, function(err, pkcs1again) {
+                                console.log(pkcs8again.data);
+                                openssl.keypair.convertECCToPKCS1({key: pkcs8again.data}, function(err, pkcs1again) {
                                     if(err) {
                                         console.log(err);
                                     } else {
-                                        console.log(pkcs1again.stdout);
+                                        console.log(pkcs1again.data);
                                     }
                                 });
                             }
