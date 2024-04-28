@@ -12,7 +12,7 @@ test('Generate encrypted PKCS1 RSA keypair', async () => {
     
     openssl.keypair.generateRSA(rsaoptions, function(err, rsa) {
         expect(err).toEqual(false);
-        expect(rsa.data.split('\r\n')[0]).toBe("-----BEGIN RSA PRIVATE KEY-----")
+        expect(rsa.data.split('\n')[0].trim()).toBe("-----BEGIN RSA PRIVATE KEY-----")
     });
 });
 
@@ -23,7 +23,7 @@ test('Generate unencrypted PKCS1 RSA keypair', async () => {
     
     openssl.keypair.generateRSA(rsaoptions, function(err, rsa) {
         expect(err).toEqual(false);
-        expect(rsa.data.split('\r\n')[0]).toBe("-----BEGIN RSA PRIVATE KEY-----")
+        expect(rsa.data.split('\n')[0].trim()).toBe("-----BEGIN RSA PRIVATE KEY-----")
     });
 });
 
@@ -38,7 +38,7 @@ test('Generate encrypted PKCS8 RSA keypair', async () => {
     
     openssl.keypair.generateRSA(rsaoptions, function(err, rsa) {
         expect(err).toEqual(false);
-        expect(rsa.data.split('\r\n')[0]).toBe("-----BEGIN ENCRYPTED PRIVATE KEY-----")
+        expect(rsa.data.split('\n')[0].trim()).toBe("-----BEGIN ENCRYPTED PRIVATE KEY-----")
     });
 });
 
@@ -49,7 +49,7 @@ test('Generate unencrypted PKCS8 RSA keypair', async () => {
     
     openssl.keypair.generateRSA(rsaoptions, function(err, rsa) {
         expect(err).toEqual(false);
-        expect(rsa.data.split('\r\n')[0]).toBe("-----BEGIN PRIVATE KEY-----")
+        expect(rsa.data.split('\n')[0].trim()).toBe("-----BEGIN PRIVATE KEY-----")
     });
 });
 
