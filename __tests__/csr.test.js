@@ -93,7 +93,7 @@ test('Generate a CSR', done => {
             expect(csr.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE REQUEST-----")
             openssl.csr.parse({csr: csr.data}, function(err, parsedcsr) {
                 expect(err).toEqual(false);
-                expect(parsedcsr.data.extensions.SANs.otherName[1]).toBe(csroptions.extensions.SANs.otherName[0])
+                expect(parsedcsr.data.extensions.SANs.otherName[1]).toBe(csroptions.extensions.SANs.otherName[1])
                 done();
             });
         });
