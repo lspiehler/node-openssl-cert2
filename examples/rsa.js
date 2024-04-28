@@ -1,5 +1,5 @@
 const node_openssl = require('../index.js');
-var openssl = new node_openssl({debug: false, binpath: "C:/Program Files/OpenSSL-Win64/bin/openssl.exe"});
+var openssl = new node_openssl({debug: false});
 
 let rsaoptionsa = {
     encryption: {

@@ -1,6 +1,6 @@
 const node_openssl = require('../index.js');
 const crypto = require('crypto');
-var openssl = new node_openssl({binpath: "C:\\Program Files\\OpenSSL-Win64\\bin\\openssl.exe"});
+var openssl = new node_openssl();
 
 const plaintext = "encrypt me";
 
