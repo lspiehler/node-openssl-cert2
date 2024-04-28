@@ -77,7 +77,7 @@ openssl.keypair.generateRSA(rsaoptionsa, function(err, rsa) {
     if(err) {
         console.log(err);
     } else {
-        console.log(rsa.data);
+        //console.log(rsa.data);
         openssl.csr.create({options: csroptions, key: rsa.data, password: rsaoptionsa.encryption.password}, function(err, csr) {
             if(err) {
                 console.log(err);
