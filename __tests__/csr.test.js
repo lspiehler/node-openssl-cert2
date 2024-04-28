@@ -11,7 +11,7 @@ test('Generate a CSR', async () => {
     }
     
     var csroptions = {
-        hash: 'sha512',
+        hash: 'sha256',
         days: 240,
         /*requestAttributes: {
             challengePassword: "this is my challenge passphrase"
