@@ -1,7 +1,7 @@
 const node_openssl = require('../index.js');
 var openssl = new node_openssl();
 
-test('Generate a CSR', async () => {
+test('Generate a CSR', done => {
     let rsaoptionsa = {
         encryption: {
             password: '!@#$%^&*()_+|}{:"?><1234567890-=][;/.,\\',
@@ -93,7 +93,8 @@ test('Generate a CSR', async () => {
             expect(csr.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE REQUEST-----")
             openssl.csr.parse({csr: csr.data}, function(err, parsedcsr) {
                 expect(err).toEqual(false);
-                expect(parsedcsr.data.extensions.SANs.otherName[1]).toBe(csroptions.extensions.SANs.otherName[1])
+                expect(parsedcsr.data.extensions.SANs.otherName[1]).toBe(csroptions.extensions.SANs.otherName[0])
+                done();
             });
         });
     });
