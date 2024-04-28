@@ -76,10 +76,10 @@ test('Generate a CSR', async () => {
     
     openssl.keypair.generateRSA(rsaoptionsa, function(err, rsa) {
         expect(err).toEqual(false);
-        expect(rsa.data.split('\r\n')[0]).toBe("-----BEGIN RSA PRIVATE KEY-----")
+        expect(rsa.data.split('\n')[0].trim()).toBe("-----BEGIN RSA PRIVATE KEY-----")
         openssl.csr.create({options: csroptions, key: rsa.data, password: rsaoptionsa.encryption.password}, function(err, csr) {
             expect(err).toEqual(false);
-            expect(csr.data.split('\r\n')[0]).toBe("-----BEGIN CERTIFICATE REQUEST-----")
+            expect(csr.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE REQUEST-----")
         });
     });
 });

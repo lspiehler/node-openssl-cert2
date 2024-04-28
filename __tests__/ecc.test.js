@@ -21,7 +21,7 @@ test('Generate ECC keypairs. Test convert, encrypt and decrypt', async () => {
     
     openssl.keypair.generateECC(ecckeyoptionsa, function(err, ecc) {
         expect(err).toEqual(false);
-        expect(ecc.data.split('\r\n')[0]).toBe("-----BEGIN ENCRYPTED PRIVATE KEY-----")
+        expect(ecc.data.split('\n')[0].trim()).toBe("-----BEGIN ENCRYPTED PRIVATE KEY-----")
     });
 
     var ecckeyoptionsb = {
@@ -36,19 +36,19 @@ test('Generate ECC keypairs. Test convert, encrypt and decrypt', async () => {
 
     openssl.keypair.generateECC({format: 'PKCS1'}, function(err, ecc) {
         expect(err).toEqual(false);
-        expect(ecc.data.split('\r\n')[0]).toBe("-----BEGIN EC PRIVATE KEY-----")
+        expect(ecc.data.split('\n')[0].trim()).toBe("-----BEGIN EC PRIVATE KEY-----")
         openssl.keypair.convertToPKCS8({key: ecc.data, password: ecckeyoptionsb.encryption.password}, function(err, pkcs8) {
             expect(err).toEqual(false);
-            expect(pkcs8.data.split('\r\n')[0]).toBe("-----BEGIN ENCRYPTED PRIVATE KEY-----")
+            expect(pkcs8.data.split('\n')[0].trim()).toBe("-----BEGIN ENCRYPTED PRIVATE KEY-----")
             openssl.keypair.convertECCToPKCS1({key: pkcs8.data, encryption: ecckeyoptionsb.encryption}, function(err, pkcs1) {
                 expect(err).toEqual(false);
-                expect(pkcs1.data.split('\r\n')[0]).toBe("-----BEGIN EC PRIVATE KEY-----")
+                expect(pkcs1.data.split('\n')[0].trim()).toBe("-----BEGIN EC PRIVATE KEY-----")
                 openssl.keypair.convertToPKCS8({key: pkcs1.data, password: ecckeyoptionsb.encryption.password, decrypt: true}, function(err, pkcs8again) {
                     expect(err).toEqual(false);
-                    expect(pkcs8again.data.split('\r\n')[0]).toBe("-----BEGIN PRIVATE KEY-----")
+                    expect(pkcs8again.data.split('\n')[0].trim()).toBe("-----BEGIN PRIVATE KEY-----")
                     openssl.keypair.convertECCToPKCS1({key: pkcs8again.data}, function(err, pkcs1again) {
                         expect(err).toEqual(false);
-                        expect(pkcs1again.data.split('\r\n')[0]).toBe("-----BEGIN EC PRIVATE KEY-----")
+                        expect(pkcs1again.data.split('\n')[0].trim()).toBe("-----BEGIN EC PRIVATE KEY-----")
                     });
                 });
             });
