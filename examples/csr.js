@@ -21,6 +21,10 @@ var csroptions = {
 			{
 				OID: '1.3.6.1.4.1.311.20.2',
 				value: 'ASN1:PRINTABLESTRING:Test Template'
+			},
+			{
+				OID: '1.3.6.1.4.1.11129.2.4.3',
+				value: 'critical,ASN1:NULL'
 			}
 		],
 		tlsfeature: ['status_request'],
@@ -44,13 +48,20 @@ var csroptions = {
 				'ipsecIKE',
 				'ipsecUser',
 				'ipsecTunnel',
-				'ipsecEndSystem'
+				'ipsecEndSystem',
+				'1.3.6.1.4.1.311.10.3.1',
+				'1.3.6.1.4.1.311.10.3.3',
+				'1.3.6.1.4.1.311.10.3.4'
 			]	
 		},
 		SANs: {
 			DNS: [
 				'certificatetools.com',
 				'www.certificatetools.com'
+			],
+			otherName: [
+				'msUPN;UTF8:lspiehler',
+				'1.2.3.4;UTF8:example othername'
 			]
 		}
 	},
@@ -82,7 +93,14 @@ openssl.keypair.generateRSA(rsaoptionsa, function(err, rsa) {
             if(err) {
                 console.log(err);
             } else {
-                console.log(csr.data);
+                //console.log(csr.data);
+				openssl.csr.parse({csr: csr.data}, function(err, csr) {
+					if(err) {
+						console.log(err);
+					} else {
+						console.log(csr.data.extensions.SANs);
+					}
+				});
             }
         });
     }
