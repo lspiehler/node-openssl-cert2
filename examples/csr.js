@@ -12,10 +12,10 @@ let rsaoptionsa = {
 var csroptions = {
 	hash: 'sha512',
 	days: 240,
-	/*requestAttributes: {
+	requestAttributes: {
 		challengePassword: "this is my challenge passphrase"
 	},
-	string_mask: "nombstr",*/
+	string_mask: "nombstr",
 	extensions: {
 		customOIDs: [
 			{
@@ -98,7 +98,7 @@ openssl.keypair.generateRSA(rsaoptionsa, function(err, rsa) {
 					if(err) {
 						console.log(err);
 					} else {
-						console.log(csr.data.extensions.SANs);
+						console.log(csr.data.extensions.SANs.otherName[1]);
 					}
 				});
             }
