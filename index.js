@@ -3,6 +3,7 @@ const fs = require('fs');
 const keypair = require("./lib/keypair");
 const binary = require("./lib/binary");
 const crypto = require("./lib/crypto");
+const csr = require("./lib/csr");
 
 var openssl = function(options) {
 
@@ -18,6 +19,7 @@ var openssl = function(options) {
 	this.keypair = keypair;
     this.binary = binary;
     this.crypto = crypto;
+    this.csr = csr;
 }
 
 module.exports = openssl;
