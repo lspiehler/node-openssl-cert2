@@ -61,7 +61,7 @@ var csroptions = {
 			],
 			otherName: [
 				'msUPN;UTF8:lspiehler',
-				'1.2.3.4;UTF8:example othername'
+				'1.2.3.4;UTCTIME:240101010101Z',
 			]
 		}
 	},
@@ -93,7 +93,7 @@ openssl.keypair.generateRSA(rsaoptionsa, function(err, rsa) {
             if(err) {
                 console.log(err);
             } else {
-                //console.log(csr.data);
+                console.log(csr.data);
 				openssl.csr.parse({csr: csr.data}, function(err, csr) {
 					if(err) {
 						console.log(err);
