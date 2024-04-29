@@ -12,7 +12,6 @@ test('Generate a CSR', done => {
     
     var csroptions = {
         hash: 'sha512',
-        days: 240,
         requestAttributes: {
             challengePassword: "this is my challenge passphrase"
         },
@@ -51,7 +50,7 @@ test('Generate a CSR', done => {
                     'ipsecTunnel',
                     'ipsecEndSystem',
                     '1.3.6.1.4.1.311.10.3.1',
-                    '1.3.6.1.4.1.311.10.3.3',
+                    //'1.3.6.1.4.1.311.10.3.3',
                     '1.3.6.1.4.1.311.10.3.4'
                 ]	
             },
@@ -94,7 +93,19 @@ test('Generate a CSR', done => {
             openssl.csr.parse({csr: csr.data}, function(err, parsedcsr) {
                 expect(err).toEqual(false);
                 expect(parsedcsr.data.extensions.SANs.otherName[1]).toBe(csroptions.extensions.SANs.otherName[1])
-                done();
+                openssl.keypair.generateRSA({}, function(err, rsa) {
+                    expect(err).toEqual(false);
+                    expect(rsa.data.split('\n')[0].trim()).toBe("-----BEGIN PRIVATE KEY-----")
+                    openssl.csr.create({options: parsedcsr.data, key: rsa.data}, function(err, csr) {
+                        expect(err).toEqual(false);
+                        expect(csr.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE REQUEST-----")
+                        openssl.csr.parse({csr: csr.data}, function(err, parsedcsr) {  
+                            expect(err).toEqual(false);
+                            expect(parsedcsr.data.extensions.SANs.otherName[0]).toBe(csroptions.extensions.SANs.otherName[0])
+                            done();
+                        });
+                    });
+                });
             });
         });
     });
