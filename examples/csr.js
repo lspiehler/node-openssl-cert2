@@ -50,7 +50,7 @@ var csroptions = {
 				'ipsecTunnel',
 				'ipsecEndSystem',
 				'1.3.6.1.4.1.311.10.3.1',
-				//'1.3.6.1.4.1.311.10.3.3',
+				'1.3.6.1.4.1.311.10.3.3',
 				'1.3.6.1.4.1.311.10.3.4'
 			]	
 		},
@@ -108,6 +108,13 @@ openssl.keypair.generateRSA(rsaoptionsa, function(err, rsa) {
 										console.log(err);
 									} else {
 										console.log(csr.data);
+										openssl.csr.parse({csr: csr.data}, function(err, csrparse) {
+											if(err) {
+												console.log(err);
+											} else {
+												console.log(csrparse.data.extensions.SANs.otherName[0]);
+											}
+										});
 									}
 								});
 							}
