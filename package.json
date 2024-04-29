@@ -5,7 +5,8 @@
     "tmp": "^0.2.3"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "node ./lib/x509/buildNameMappings.js"
   },
   "name": "node-openssl-cert2",
   "version": "0.0.1",
