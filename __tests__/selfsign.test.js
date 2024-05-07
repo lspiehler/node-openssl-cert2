@@ -115,7 +115,11 @@ test('Generate a self signed certificate', done => {
                                             openssl.x509.parse({cert: cert.data}, function(err, certparse) {
                                                 expect(err).toEqual(false);
                                                 expect(certparse.data.extensions.SANs.otherName[0]).toBe(csroptions.extensions.SANs.otherName[0]);
-                                                done();
+                                                openssl.x509.getOpenSSLCertInfo({cert: cert.data}, function(err, out) {
+                                                    expect(err).toEqual(false);
+                                                    expect(out.data.split('\n')[0].trim()).toBe("Certificate:")
+                                                    done();
+                                                });
                                             });
                                         });
                                     });

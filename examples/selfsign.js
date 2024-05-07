@@ -142,7 +142,13 @@ openssl.keypair.generateRSA(rsaoptionsa, function(err, rsa) {
 																							console.log(certparse.data.extensions.SANs.DNS[0]);
 																							if(certresult.data == privresult.data) {
 																								console.log('success');
-																								//console.log(privresult.data);
+																								openssl.x509.getOpenSSLCertInfo({cert: cert.data}, function(err, out) {
+																									if(err) {
+																										console.log(err);
+																									} else {
+																										console.log(out.data);
+																									}
+																								});
 																							}
 																						}
 																					});
