@@ -52,7 +52,7 @@ openssl.keypair.generateRSA({}, function(err, rsa) {
                         openssl.x509.createPKCS12({
                             cert: cert.data,
                             key: rsa.data,
-                            //pkcs12pass: 'test'
+                            pkcs12pass: 'test'
                         }, function(err, pkcs12) {
                             if(err) {
                                 console.log(err);
@@ -60,7 +60,30 @@ openssl.keypair.generateRSA({}, function(err, rsa) {
                                 fs.writeFile('./test_files/pkcs12.pfx', pkcs12.data, function(err) {
 
                                 });
-                                console.log(pkcs12.data);
+                                openssl.x509.getKeyFromPKCS12({pkcs12: pkcs12.data, password: 'test'}, function(err, key) {
+                                    if(err) {
+                                        console.log(err);
+                                        console.log(key);
+                                    } else {
+                                        console.log(key.data);
+                                        openssl.x509.getCertFromPKCS12({pkcs12: pkcs12.data, password: 'test'}, function(err, cert) {
+                                            if(err) {
+                                                console.log(err);
+                                                console.log(cert);
+                                            } else {
+                                                console.log(cert.data);
+                                                openssl.x509.getChainFromPKCS12({pkcs12: pkcs12.data, password: 'test'}, function(err, chain) {
+                                                    if(err) {
+                                                        console.log(err);
+                                                        //console.log(chain);
+                                                    } else {
+                                                        console.log(chain.data);
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
                             }
                         });
                     }
