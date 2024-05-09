@@ -1,5 +1,5 @@
 const node_openssl = require('../index.js');
-var openssl = new node_openssl({debug: true});
+var openssl = new node_openssl({debug: false});
 
 let rootcarsaoptions = {
     encryption: {
@@ -104,7 +104,7 @@ var csroptions = {
 				'certificatetools.com',
 				'www.certificatetools.com'
 		],
-		emailAddress: 'lyas.spiehler@slidellmemorial.org'
+		emailAddress: 'email@domain.com'
 	}
 
 }

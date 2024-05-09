@@ -79,7 +79,7 @@ test('Generate a self signed certificate', done => {
                     'certificatetools.com',
                     'www.certificatetools.com'
             ],
-            emailAddress: 'lyas.spiehler@slidellmemorial.org'
+            emailAddress: 'email@domain.com'
         }
     
     }

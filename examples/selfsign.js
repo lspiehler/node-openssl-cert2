@@ -79,7 +79,7 @@ var csroptions = {
 				'certificatetools.com',
 				'www.certificatetools.com'
 		],
-		emailAddress: 'lyas.spiehler@slidellmemorial.org'
+		emailAddress: 'email@domain.com'
 	}
 
 }
