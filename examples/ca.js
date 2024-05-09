@@ -144,7 +144,7 @@ openssl.keypair.generateRSA(rootcarsaoptions, function(err, rsa) {
 											if(err) {
 												console.log(err);
 											} else {
-												console.log(sign);
+												console.log(sign.data);
 											}
 										});
 									}
