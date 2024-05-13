@@ -146,27 +146,27 @@ openssl.keypair.generateRSA(rootcarsaoptions, function(err, rootcarsa) {
     if(err) {
         console.log(err);
     } else {
-        console.log(rootcarsa.data);
+        //console.log(rootcarsa.data);
         openssl.csr.create({options: rootcacsroptions, key: rootcarsa.data, password: rootcarsaoptions.encryption.password}, function(err, csr) {
             if(err) {
                 console.log(err);
             } else {
-                console.log(csr.data);
+                //console.log(csr.data);
 				openssl.x509.selfSignCSR({options: rootcacsroptions, csr: csr.data, key: rootcarsa.data, password: rootcarsaoptions.encryption.password}, function(err, rootcacert) {
 					if(err) {
 						console.log(err);
 					} else {
-						console.log(rootcacert.data);
+						//console.log(rootcacert.data);
 						openssl.keypair.generateRSA(subcarsaoptions, function(err, subcarsa) {
 							if(err) {
 								console.log(err);
 							} else {
-								console.log(subcarsa.data);
+								//console.log(subcarsa.data);
 								openssl.csr.create({options: subcacsroptions, key: subcarsa.data, password: subcarsaoptions.encryption.password}, function(err, subcacsr) {
 									if(err) {
 										console.log(err);
 									} else {
-										console.log(subcacsr.data);
+										//console.log(subcacsr.data);
 										openssl.x509.CASignCSR({
 											key: rootcarsa.data,
 											password: rootcarsaoptions.encryption.password,
@@ -177,17 +177,17 @@ openssl.keypair.generateRSA(rootcarsaoptions, function(err, rootcarsa) {
 											if(err) {
 												console.log(err);
 											} else {
-												console.log(subcacert.data);
+												//console.log(subcacert.data);
 												openssl.keypair.generateRSA({}, function(err, rsacert) {
 													if(err) {
 														console.log(err);
 													} else {
-														console.log(rsacert.data);
+														//console.log(rsacert.data);
 														openssl.csr.create({options: csroptions, key: rsacert.data}, function(err, csrcert) {
 															if(err) {
 																console.log(err);
 															} else {
-																console.log(csrcert.data);
+																//console.log(csrcert.data);
 																openssl.x509.CASignCSR({
 																	key: subcarsa.data,
 																	password: subcarsaoptions.encryption.password,
@@ -198,7 +198,23 @@ openssl.keypair.generateRSA(rootcarsaoptions, function(err, rootcarsa) {
 																	if(err) {
 																		console.log(err);
 																	} else {
-																		console.log(leafcert.data);
+																		//console.log(leafcert.data);
+																		let revoked = [];
+																		revoked[leafcert.serial] = 'keyCompromise'
+																		revoked['6C1B17D5E80FF201A0BCB6BF1502F809E3A3FECE'] = 'superseded'
+																		openssl.crl.generate({
+																			key: subcarsa.data,
+																			password: subcarsaoptions.encryption.password,
+																			ca: subcacert.data,
+																			crldays: 90,
+																			revoked: revoked
+																		}, function(err, crl) {
+																			if(err) {
+																				console.log(err);
+																			} else {
+																				console.log(crl.data);
+																			}
+																		});
 																	}
 																});
 															}

@@ -5,6 +5,7 @@ const binary = require("./lib/binary");
 const crypto = require("./lib/crypto");
 const csr = require("./lib/csr");
 const x509 = require("./lib/x509");
+const crl = require("./lib/crl");
 
 var openssl = function(options) {
 
@@ -22,6 +23,7 @@ var openssl = function(options) {
     this.crypto = crypto;
     this.csr = csr;
     this.x509 = x509;
+    this.crl = crl;
 }
 
 module.exports = openssl;
