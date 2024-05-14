@@ -11,10 +11,10 @@ var openssl = function(options) {
 
     if(options) {
 		if(options.binpath) {
-			binary.setPath(options.binpath);
+			binary.openssl.setPath(options.binpath);
 		}
 		if(options.debug) {
-			binary.enableDebug();
+			binary.openssl.enableDebug();
 		}
 	}
 
