@@ -6,6 +6,7 @@ const crypto = require("./lib/crypto");
 const csr = require("./lib/csr");
 const x509 = require("./lib/x509");
 const crl = require("./lib/crl");
+const pkcs11 = require("./lib/pkcs11");
 
 var openssl = function(options) {
 
@@ -16,6 +17,12 @@ var openssl = function(options) {
 		if(options.debug) {
 			binary.openssl.enableDebug();
 		}
+		if(options.pkcs11toolbinpath) {
+			binary.pkcs11Tool.setPath(options.pkcs11toolbinpath);
+		}
+		if(options.libdir) {
+			binary.pkcs11Tool.setLibDir(options.libdir);
+		}
 	}
 
 	this.keypair = keypair;
@@ -24,6 +31,7 @@ var openssl = function(options) {
     this.csr = csr;
     this.x509 = x509;
     this.crl = crl;
+	this.pkcs11 = pkcs11;
 }
 
 module.exports = openssl;
