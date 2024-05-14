@@ -1,7 +1,7 @@
 const node_openssl = require('../index.js');
 var openssl = new node_openssl();
 
-test('Generate cert, convert to PKCS12 and back', done => {
+test('Generate root ca, intermediate and sign leaf cert', done => {
     let rootcarsaoptions = {
         encryption: {
             password: '!@#$%^&*()_+|}{:"?><1234567890-=][;/.,\\',
@@ -10,7 +10,40 @@ test('Generate cert, convert to PKCS12 and back', done => {
         format: "PKCS8"
     }
     
+    let subcarsaoptions = {
+        encryption: {
+            password: 'subcapassword',
+            cipher: 'aes-256-cbc'
+        },
+        format: "PKCS8"
+    }
+    
     var rootcacsroptions = {
+        hash: 'sha256',
+        days: 240,
+        extensions: {
+            basicConstraints: {
+                critical: true,
+                CA: true,
+                pathlen: 2
+            },
+            keyUsage: {
+                critical: true,
+                usages: [
+                    'keyCertSign',
+                    'cRLSign'
+                ]
+            }
+        },
+        subject: {
+            countryName: 'US',
+            commonName: [
+                'Test Root CA'
+            ]
+        }
+    }
+    
+    var subcacsroptions = {
         hash: 'sha256',
         days: 240,
         extensions: {
@@ -30,7 +63,7 @@ test('Generate cert, convert to PKCS12 and back', done => {
         subject: {
             countryName: 'US',
             commonName: [
-                'Test Root CA'
+                'Test Intermediate CA'
             ]
         }
     }
@@ -107,36 +140,55 @@ test('Generate cert, convert to PKCS12 and back', done => {
             ],
             emailAddress: 'email@domain.com'
         }
-    
     }
-    
-    openssl.keypair.generateRSA(rootcarsaoptions, function(err, rsa) {
+
+    openssl.keypair.generateRSA(rootcarsaoptions, function(err, rootcarsa) {
         expect(err).toEqual(false);
-        expect(rsa.data.split('\n')[0].trim()).toBe("-----BEGIN ENCRYPTED PRIVATE KEY-----")
-        openssl.csr.create({options: rootcacsroptions, key: rsa.data, password: rootcarsaoptions.encryption.password}, function(err, csr) {
+        expect(rootcarsa.data.split('\n')[0].trim()).toBe("-----BEGIN ENCRYPTED PRIVATE KEY-----")
+        openssl.csr.create({options: rootcacsroptions, key: rootcarsa.data, password: rootcarsaoptions.encryption.password}, function(err, rootcacsr) {
             expect(err).toEqual(false);
-            expect(csr.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE REQUEST-----")
-            openssl.x509.selfSignCSR({options: rootcacsroptions, csr: csr.data, key: rsa.data, password: rootcarsaoptions.encryption.password}, function(err, cert) {
+            expect(rootcacsr.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE REQUEST-----")
+            openssl.x509.selfSignCSR({options: rootcacsroptions, csr: rootcacsr.data, key: rootcarsa.data, password: rootcarsaoptions.encryption.password}, function(err, rootcacert) {
                 expect(err).toEqual(false);
-                expect(cert.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE-----")
-                openssl.keypair.generateRSA({}, function(err, rsacert) {
+                expect(rootcacert.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE-----")
+                openssl.keypair.generateRSA(subcarsaoptions, function(err, subcarsa) {
                     expect(err).toEqual(false);
-                    expect(rsacert.data.split('\n')[0].trim()).toBe("-----BEGIN PRIVATE KEY-----")
-                    openssl.csr.create({options: csroptions, key: rsacert.data}, function(err, csrcert) {
+                    expect(subcarsa.data.split('\n')[0].trim()).toBe("-----BEGIN ENCRYPTED PRIVATE KEY-----")
+                    openssl.csr.create({options: subcacsroptions, key: subcarsa.data, password: subcarsaoptions.encryption.password}, function(err, subcacsr) {
                         expect(err).toEqual(false);
-                        expect(csrcert.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE REQUEST-----")
+                        expect(subcacsr.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE REQUEST-----")
                         openssl.x509.CASignCSR({
-                            key: rsa.data,
+                            key: rootcarsa.data,
                             password: rootcarsaoptions.encryption.password,
-                            ca: cert.data,
-                            csr: csrcert.data,
-                            options: csroptions
-                        }, function(err, sign) {
+                            ca: rootcacert.data,
+                            csr: subcacsr.data,
+                            options: subcacsroptions
+                        }, function(err, subcacert) {
                             expect(err).toEqual(false);
-                            expect(sign.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE-----")
-                            expect(sign.files.config.split('\n')[0].trim()).toBe("[ ca ]")
-                            expect(typeof(sign.serial)).toBe("string")
-                            done();
+                            expect(subcacert.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE-----")
+                            expect(subcacert.files.config.split('\n')[0].trim()).toBe("[ ca ]")
+                            expect(typeof(subcacert.serial)).toBe("string")
+                            openssl.keypair.generateRSA({}, function(err, rsacert) {
+                                expect(err).toEqual(false);
+                                expect(rsacert.data.split('\n')[0].trim()).toBe("-----BEGIN PRIVATE KEY-----")
+                                openssl.csr.create({options: csroptions, key: rsacert.data}, function(err, csrcert) {
+                                    expect(err).toEqual(false);
+                                    expect(csrcert.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE REQUEST-----")
+                                    openssl.x509.CASignCSR({
+                                        key: subcarsa.data,
+                                        password: subcarsaoptions.encryption.password,
+                                        ca: subcacert.data,
+                                        csr: csrcert.data,
+                                        options: csroptions
+                                    }, function(err, leafcert) {
+                                        expect(err).toEqual(false);
+                                        expect(leafcert.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE-----")
+                                        expect(leafcert.files.config.split('\n')[0].trim()).toBe("[ ca ]")
+                                        expect(typeof(leafcert.serial)).toBe("string")
+                                        done();
+                                    });
+                                });
+                            });
                         });
                     });
                 });

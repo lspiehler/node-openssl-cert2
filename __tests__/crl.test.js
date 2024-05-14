@@ -1,7 +1,7 @@
 const node_openssl = require('../index.js');
 var openssl = new node_openssl();
 
-test('Generate root ca, intermediate, leaf cert, create pkcs12, and convert', done => {
+test('Generate root ca, intermediate, sign leaf cert, revoke and generate crl', done => {
     let rootcarsaoptions = {
         encryption: {
             password: '!@#$%^&*()_+|}{:"?><1234567890-=][;/.,\\',
@@ -185,26 +185,18 @@ test('Generate root ca, intermediate, leaf cert, create pkcs12, and convert', do
                                         expect(leafcert.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE-----")
                                         expect(leafcert.files.config.split('\n')[0].trim()).toBe("[ ca ]")
                                         expect(typeof(leafcert.serial)).toBe("string")
-                                        openssl.x509.createPKCS12({
-                                            cert: leafcert.data,
-                                            key: rsacert.data,
-                                            ca: rootcacert.data + '\r\n' + subcacert.data,
-                                            pkcs12pass: 'test'
-                                        }, function(err, pkcs12) {
+                                        let revoked = [];
+                                        revoked[leafcert.serial] = 'keyCompromise'
+                                        openssl.crl.generate({
+                                            key: subcarsa.data,
+                                            password: subcarsaoptions.encryption.password,
+                                            ca: subcacert.data,
+                                            crldays: 90,
+                                            revoked: revoked
+                                        }, function(err, crl) {
                                             expect(err).toEqual(false);
-                                            openssl.x509.getKeyFromPKCS12({pkcs12: pkcs12.data, password: 'test'}, function(err, key) {
-                                                expect(err).toEqual(false);
-                                                expect(key.data.split('\n')[0].trim()).toBe("-----BEGIN PRIVATE KEY-----")
-                                                openssl.x509.getCertFromPKCS12({pkcs12: pkcs12.data, password: 'test'}, function(err, cert) {
-                                                    expect(err).toEqual(false);
-                                                    expect(cert.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE-----")
-                                                    openssl.x509.getChainFromPKCS12({pkcs12: pkcs12.data, password: 'test'}, function(err, chain) {
-                                                        expect(err).toEqual(false);
-                                                        expect(chain.data[0].split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE-----")
-                                                        done();
-                                                    });
-                                                });
-                                            });
+                                            expect(crl.data.split('\n')[0].trim()).toBe("-----BEGIN X509 CRL-----")
+                                            done();
                                         });
                                     });
                                 });
