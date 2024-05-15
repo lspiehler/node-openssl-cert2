@@ -34,5 +34,8 @@
   "bugs": {
     "url": "https://github.com/lspiehler/node-openssl-cert2/issues"
   },
-  "homepage": "https://github.com/lspiehler/node-openssl-cert2#readme"
+  "homepage": "https://github.com/lspiehler/node-openssl-cert2#readme",
+  "devDependencies": {
+    "madge": "^7.0.0"
+  }
 }
