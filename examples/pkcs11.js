@@ -137,6 +137,25 @@ openssl.pkcs11.listSlots({modulePath: openssl.binary.pkcs11Tool.getLibDir() + '/
                                                         } else {
                                                             console.log(leafcert);
                                                             console.log(leafcert.data);
+                                                            let revoked = [];
+                                                            revoked[leafcert.serial] = 'keyCompromise'
+                                                            openssl.crl.generate({
+                                                                ca: object.data,
+                                                                crldays: 90,
+                                                                revoked: revoked,
+                                                                pkcs11: {
+                                                                    serial: slots.data[0]['serial num'],
+                                                                    objectid: objects.data[0]['ID'],
+                                                                    pin: '123456',
+                                                                    modulePath: openssl.binary.pkcs11Tool.getLibDir() + '/x86_64-linux-gnu/libykcs11.so'
+                                                                }
+                                                            }, function(err, crl) {
+                                                                if(err) {
+                                                                    console.log(err);
+                                                                } else {
+                                                                    console.log(crl.data);
+                                                                }
+                                                            });
                                                         }
                                                     });
                                                 }
