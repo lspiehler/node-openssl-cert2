@@ -1,4 +1,5 @@
 const node_openssl = require('../index.js');
+const binary = require('../lib/binary/index.js');
 var openssl = new node_openssl({debug: false});
 
 let rootcarsaoptions = {
@@ -201,7 +202,7 @@ openssl.keypair.generateRSA(rootcarsaoptions, function(err, rootcarsa) {
 																		//console.log(leafcert.data);
 																		let revoked = [];
 																		revoked[leafcert.serial] = 'keyCompromise'
-																		revoked['6C1B17D5E80FF201A0BCB6BF1502F809E3A3FECE'] = 'superseded'
+																		//revoked['6C1B17D5E80FF201A0BCB6BF1502F809E3A3FECE'] = 'superseded'
 																		openssl.crl.generate({
 																			key: subcarsa.data,
 																			password: subcarsaoptions.encryption.password,
@@ -213,6 +214,32 @@ openssl.keypair.generateRSA(rootcarsaoptions, function(err, rootcarsa) {
 																				console.log(err);
 																			} else {
 																				console.log(crl.data);
+																				binary.openssl.getVersion(function(err, version) {
+																					if(err) {
+																						callback('Failed to get openssl version: ' + err, {});
+																					} else {
+																						if(version.substring(0, 1) == "3") {
+																							let revoked = [];
+																							revoked['6C1B17D5E80FF201A0BCB6BF1502F809E3A3FECE'] = 'keyCompromise'
+																							//revoked['6C1B17D5E80FF201A0BCB6BF1502F809E3A3FECE'] = 'superseded'
+																							openssl.crl.generate({
+																								key: subcarsa.data,
+																								password: subcarsaoptions.encryption.password,
+																								ca: subcacert.data,
+																								crldays: 90,
+																								revoked: revoked,
+																								crl: crl.data
+																							}, function(err, crl) {
+																								if(err) {
+																									console.log(err);
+																								} else {
+																									console.log(crl.data);
+																									console.log(crl);
+																								}
+																							});
+																						}
+																					}
+																				});
 																			}
 																		});
 																	}
