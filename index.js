@@ -7,6 +7,7 @@ const csr = require("./lib/csr");
 const x509 = require("./lib/x509");
 const crl = require("./lib/crl");
 const pkcs11 = require("./lib/pkcs11");
+const softhsm2 = require("./lib/softhsm2");
 
 var openssl = function(options) {
 
@@ -32,6 +33,7 @@ var openssl = function(options) {
     this.x509 = x509;
     this.crl = crl;
 	this.pkcs11 = pkcs11;
+	this.softhsm2 = softhsm2;
 }
 
 module.exports = openssl;

@@ -1,6 +1,8 @@
 const node_openssl = require('../index.js');
 var openssl = new node_openssl({binpath: 'openssl', debug: false});
 
+const lib = '/usr/lib/x86_64-linux-gnu/libykcs11.so';
+
 var csroptions = {
 	hash: 'sha512',
 	days: 240,
@@ -75,7 +77,7 @@ var csroptions = {
 	}
 }
 
-openssl.pkcs11.listSlots({modulePath: openssl.binary.pkcs11Tool.getLibDir() + '/x86_64-linux-gnu/libykcs11.so'}, function(err, slots, cmd) {
+openssl.pkcs11.listSlots({modulePath: lib}, function(err, slots, cmd) {
     if(err) {
         console.log(err);
     } else {
@@ -84,7 +86,7 @@ openssl.pkcs11.listSlots({modulePath: openssl.binary.pkcs11Tool.getLibDir() + '/
             console.log('no slots found');
         } else {
             openssl.pkcs11.listObjects({
-                modulePath: openssl.binary.pkcs11Tool.getLibDir() + '/x86_64-linux-gnu/libykcs11.so',
+                modulePath: lib,
                 slotid: slots.data[0].hexid
             }, function(err, objects) {
                 if(err) {
@@ -92,7 +94,7 @@ openssl.pkcs11.listSlots({modulePath: openssl.binary.pkcs11Tool.getLibDir() + '/
                 } else {
                     console.log(objects);
                     openssl.pkcs11.readObject({
-                        modulePath: openssl.binary.pkcs11Tool.getLibDir() + '/x86_64-linux-gnu/libykcs11.so',
+                        modulePath: lib,
                         slotid: slots.data[0].hexid,
                         type: 'cert',
                         objectid: objects.data[0]['ID']
@@ -102,7 +104,7 @@ openssl.pkcs11.listSlots({modulePath: openssl.binary.pkcs11Tool.getLibDir() + '/
                         } else {
                             console.log(object.data);
                             openssl.pkcs11.readObject({
-                                modulePath: openssl.binary.pkcs11Tool.getLibDir() + '/x86_64-linux-gnu/libykcs11.so',
+                                modulePath: lib,
                                 slotid: slots.data[0].hexid,
                                 type: 'pubkey',
                                 objectid: objects.data[0]['ID']
@@ -129,7 +131,7 @@ openssl.pkcs11.listSlots({modulePath: openssl.binary.pkcs11Tool.getLibDir() + '/
                                                             serial: slots.data[0]['serial num'],
                                                             objectid: objects.data[0]['ID'],
                                                             pin: '123456',
-                                                            modulePath: openssl.binary.pkcs11Tool.getLibDir() + '/x86_64-linux-gnu/libykcs11.so'
+                                                            modulePath: lib
                                                         }
                                                     }, function(err, leafcert) {
                                                         if(err) {
@@ -147,7 +149,7 @@ openssl.pkcs11.listSlots({modulePath: openssl.binary.pkcs11Tool.getLibDir() + '/
                                                                     serial: slots.data[0]['serial num'],
                                                                     objectid: objects.data[0]['ID'],
                                                                     pin: '123456',
-                                                                    modulePath: openssl.binary.pkcs11Tool.getLibDir() + '/x86_64-linux-gnu/libykcs11.so'
+                                                                    modulePath: lib
                                                                 }
                                                             }, function(err, crl) {
                                                                 if(err) {
