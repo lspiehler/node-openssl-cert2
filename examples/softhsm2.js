@@ -1,5 +1,4 @@
 const node_openssl = require('../index.js');
-const binary = require('../lib/binary/index.js');
 var openssl = new node_openssl({binpath: 'openssl', debug: false});
 const fs = require('fs');
 
@@ -80,7 +79,8 @@ var csroptions = {
 		SANs: {
 			DNS: [
 				'certificatetools.com',
-				'www.certificatetools.com'
+				'www.certificatetools.com',
+				'⚙️'
 			],
 			otherName: [
 				'msUPN;UTF8:lspiehler',
@@ -144,6 +144,7 @@ fs.stat(lib, function(err, stat) {
 								console.log(err);
 							} else {
 								console.log(softhsm);
+								console.log('here');
 								openssl.pkcs11.listObjects({
 									modulePath: lib,
 									slotid: softhsm.data.hexid
@@ -180,73 +181,89 @@ fs.stat(lib, function(err, stat) {
 													if(err) {
 														console.log(err);
 													} else {
+														console.log('TESTING');
 														console.log(rootcacert);
-														openssl.pkcs11.importCertificate({
-															modulePath: lib,
-															label: label,
-															slotid: softhsm.data.hexid,
-															objectid: kpresult.data[0]['ID'],
-															keytype: 'rsa:2048',
-															pin: pin,
-															loginType: "User",
-															serial: softhsm.data['serial num'],
-															cert: rootcacert.data
-														}, function(err, resp) {
+														openssl.x509.parse({cert: rootcacert.data}, function(err, caparse) {
 															if(err) {
 																console.log(err);
 															} else {
-																console.log(resp);
-																openssl.pkcs11.listObjects({
+																console.log(caparse.data.attributes['Subject String']);
+																openssl.pkcs11.importCertificate({
 																	modulePath: lib,
-																	slotid: softhsm.data.hexid
-																}, function(err, objects) {
+																	label: label,
+																	slotid: softhsm.data.hexid,
+																	objectid: kpresult.data[0]['ID'],
+																	keytype: 'rsa:2048',
+																	pin: pin,
+																	loginType: "User",
+																	serial: softhsm.data['serial num'],
+																	cert: rootcacert.data
+																}, function(err, resp) {
 																	if(err) {
 																		console.log(err);
 																	} else {
-																		console.log(objects);
-																		openssl.keypair.generateRSA({}, function(err, rsacert) {
+																		console.log(resp);
+																		openssl.pkcs11.listObjects({
+																			modulePath: lib,
+																			slotid: softhsm.data.hexid
+																		}, function(err, objects) {
 																			if(err) {
 																				console.log(err);
 																			} else {
-																				console.log(rsacert.data);
-																				openssl.csr.create({options: csroptions, key: rsacert.data}, function(err, csrcert) {
+																				console.log(objects);
+																				openssl.keypair.generateRSA({}, function(err, rsacert) {
 																					if(err) {
 																						console.log(err);
 																					} else {
-																						console.log(csrcert.data);
-																						openssl.x509.CASignCSR({
-																							ca: rootcacert.data,
-																							csr: csrcert.data,
-																							options: csroptions,
-																							pkcs11: {
-																								serial: softhsm.data['serial num'],
-																								objectid: kpresult.data[0]['ID'],
-																								pin: pin,
-																								modulePath: lib
-																							}
-																						}, function(err, leafcert) {
+																						console.log(rsacert.data);
+																						openssl.csr.create({options: csroptions, key: rsacert.data}, function(err, csrcert) {
 																							if(err) {
 																								console.log(err);
 																							} else {
-																								console.log(leafcert);
-																								console.log(leafcert.data);
-																								let revoked = [];
-																								revoked[leafcert.serial] = 'keyCompromise'
-																								openssl.crl.generate({
+																								console.log(csrcert.data);
+																								openssl.x509.CASignCSR({
 																									ca: rootcacert.data,
-																									crldays: 90,
-																									revoked: revoked,
+																									csr: csrcert.data,
+																									options: csroptions,
 																									pkcs11: {
 																										serial: softhsm.data['serial num'],
 																										objectid: kpresult.data[0]['ID'],
 																										pin: pin,
 																										modulePath: lib
 																									}
-																								}, function(err, crl) {
+																								}, function(err, leafcert) {
 																									if(err) {
 																										console.log(err);
 																									} else {
-																										console.log(crl.data);
+																										console.log(leafcert);
+																										console.log(leafcert.data);
+																										openssl.x509.parse({cert: leafcert.data}, function(err, certparse) {
+																											if(err) {
+																												console.log(err);
+																											} else {
+																												console.log(csroptions.extensions.SANs.DNS[2]);
+																												console.log(certparse.data.extensions.SANs.DNS[2]);
+																												let revoked = [];
+																												revoked[leafcert.serial] = 'keyCompromise'
+																												openssl.crl.generate({
+																													ca: rootcacert.data,
+																													crldays: 90,
+																													revoked: revoked,
+																													pkcs11: {
+																														serial: softhsm.data['serial num'],
+																														objectid: kpresult.data[0]['ID'],
+																														pin: pin,
+																														modulePath: lib
+																													}
+																												}, function(err, crl) {
+																													if(err) {
+																														console.log(err);
+																													} else {
+																														console.log(crl.data);
+																													}
+																												});
+																											}
+																										});
 																									}
 																								});
 																							}
