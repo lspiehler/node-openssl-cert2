@@ -57,8 +57,8 @@ jobs:
         sudo apt install -y softhsm2 opensc libengine-pkcs11-openssl
     - name: Add user to softhsm group
       run: |
-      sudo usermod -aG softhsm $USER
-      sudo -s -u ${USER} bash -c 'whoami && groups'
+        sudo usermod -aG softhsm $USER
+        sudo -s -u ${USER} bash -c 'whoami && groups'
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
