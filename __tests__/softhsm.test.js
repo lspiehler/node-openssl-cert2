@@ -220,7 +220,7 @@ test('Create a softhsm2, initialize slots, generate a private key, root ca, sign
                                                             expect(leafcert.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE-----")
                                                             openssl.x509.parse({cert: leafcert.data}, function(err, certparse) {
                                                                 expect(err).toEqual(false);
-                                                                expect(csroptions.extensions.SANs.DNS[2]).toBe(certparse.data.extensions.SANs.DNS[2]);
+                                                                expect('⚙️').toBe(certparse.data.extensions.SANs.DNS[2]);
                                                                 let revoked = [];
                                                                 revoked[leafcert.serial] = 'keyCompromise'
                                                                 openssl.crl.generate({
