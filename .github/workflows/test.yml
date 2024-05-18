@@ -32,6 +32,7 @@ jobs:
       run: |
         sudo usermod -aG softhsm $USER
         sudo -s -u ${USER} bash -c 'whoami && groups'
+        sudo ls -lh /var/lib
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
@@ -59,6 +60,7 @@ jobs:
       run: |
         sudo usermod -aG softhsm $USER
         sudo -s -u ${USER} bash -c 'whoami && groups'
+        sudo ls -lh /var/lib
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
