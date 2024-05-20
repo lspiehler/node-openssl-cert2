@@ -152,12 +152,12 @@ openssl.keypair.generateRSA({}, function(err, reciprootcarsa) {
                                                         console.log(err);
                                                     } else {
                                                         console.log(senderrootcarsa.data);
-                                                        openssl.csr.create({options: sendercacsroptions, key: senderrootcarsa.data}, function(err, sendercsr) {
+                                                        openssl.csr.create({options: sendercacsroptions, key: senderrootcarsa.data}, function(err, sendercacsr) {
                                                             if(err) {
                                                                 console.log(err);
                                                             } else {
-                                                                console.log(sendercsr.data);
-                                                                openssl.x509.selfSignCSR({options: sendercacsroptions, csr: sendercsr.data, key: senderrootcarsa.data}, function(err, senderrootcacert) {
+                                                                console.log(sendercacsr.data);
+                                                                openssl.x509.selfSignCSR({options: sendercacsroptions, csr: sendercacsr.data, key: senderrootcarsa.data}, function(err, senderrootcacert) {
                                                                     if(err) {
                                                                         console.log(err);
                                                                     } else {
