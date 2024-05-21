@@ -253,21 +253,28 @@ openssl.keypair.generateRSA(rootcarsaoptions, function(err, rootcarsa) {
 																										console.log(err);
 																									} else {
 																										console.log(ocspreq);
-																										let revoked = [];
-																										revoked[leafcert.serial] = 'keyCompromise'
-																										//revoked['6C1B17D5E80FF201A0BCB6BF1502F809E3A3FECE'] = 'superseded'
-																										openssl.ocsp.response({
-																											key: subcaocsprsa.data,
-																											cert: ocspcert.data,
-																											ca: subcacert.data,
-																											days: 10,
-																											revoked: revoked,
-																											request: ocspreq.data
-																										}, function(err, ocspresp) {
+																										openssl.x509.parse({cert: leafcert.data}, function(err, parseleafcert) {
 																											if(err) {
 																												console.log(err);
 																											} else {
-																												console.log(ocspresp);
+																												//console.log(parseleafcert.data.attributes['Serial Number'].split(':').join('').toUpperCase());
+																												let revoked = [];
+																												revoked[parseleafcert.data.attributes['Serial Number'].split(':').join('').toUpperCase()] = 'keyCompromise'
+																												//revoked['6C1B17D5E80FF201A0BCB6BF1502F809E3A3FECE'] = 'superseded'
+																												openssl.ocsp.response({
+																													key: subcaocsprsa.data,
+																													cert: ocspcert.data,
+																													ca: subcacert.data,
+																													days: 10,
+																													revoked: revoked,
+																													request: ocspreq.data
+																												}, function(err, ocspresp) {
+																													if(err) {
+																														console.log(err);
+																													} else {
+																														console.log(ocspresp);
+																													}
+																												});
 																											}
 																										});
 																									}
