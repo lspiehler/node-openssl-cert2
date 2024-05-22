@@ -267,7 +267,8 @@ openssl.keypair.generateRSA(rootcarsaoptions, function(err, rootcarsa) {
 																													ca: subcacert.data,
 																													days: 10,
 																													revoked: revoked,
-																													request: ocspreq.data
+																													request: ocspreq.data,
+																													nonce: false
 																												}, function(err, ocspresp) {
 																													if(err) {
 																														console.log(err);
