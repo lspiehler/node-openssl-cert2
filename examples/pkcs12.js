@@ -1,6 +1,5 @@
 const node_openssl = require('../index.js');
 var openssl = new node_openssl({debug: false});
-const fs = require('fs');
 
 let rootcarsaoptions = {
     encryption: {
