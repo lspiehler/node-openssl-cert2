@@ -12,9 +12,9 @@ ARG MAKE_DEFINES="-j 8"
 
 ARG SIG_ALG="dilithium3"
 
-ARG ALPINE_VERSION="3.20"
+ARG BASE_IMAGE="node:lts-alpine3.20"
 
-FROM alpine:${ALPINE_VERSION} as buildopenssl
+FROM ${BASE_IMAGE} as buildopenssl
 ARG INSTALLDIR_OPENSSL
 ARG INSTALLDIR_LIBOQS
 ARG LIBOQS_BUILD_DEFINES
@@ -40,7 +40,7 @@ WORKDIR /optbuild/openssl
 RUN LDFLAGS="-Wl,-rpath -Wl,${INSTALLDIR_OPENSSL}/lib64" ./config shared --prefix=${INSTALLDIR_OPENSSL} && \
     make ${MAKE_DEFINES} && make install && if [ -d ${INSTALLDIR_OPENSSL}/lib64 ]; then ln -s ${INSTALLDIR_OPENSSL}/lib64 ${INSTALLDIR_OPENSSL}/lib; fi && if [ -d ${INSTALLDIR_OPENSSL}/lib ]; then ln -s ${INSTALLDIR_OPENSSL}/lib ${INSTALLDIR_OPENSSL}/lib64; fi
 
-FROM alpine:${ALPINE_VERSION} as buildliboqs
+FROM ${BASE_IMAGE} as buildliboqs
 # Take in all global args
 ARG INSTALLDIR_OPENSSL
 ARG INSTALLDIR_LIBOQS
@@ -65,7 +65,7 @@ RUN mkdir /optbuild && cd /optbuild && git clone --depth 1 --branch main https:/
 WORKDIR /optbuild/liboqs
 RUN mkdir build && cd build && cmake -G"Ninja" .. -DOPENSSL_ROOT_DIR=${INSTALLDIR_OPENSSL} ${LIBOQS_BUILD_DEFINES} -DCMAKE_INSTALL_PREFIX=${INSTALLDIR_LIBOQS} && ninja install
 
-FROM alpine:${ALPINE_VERSION} as buildoqsprovider
+FROM ${BASE_IMAGE} as buildoqsprovider
 # Take in all global args
 ARG INSTALLDIR_OPENSSL
 ARG INSTALLDIR_LIBOQS
