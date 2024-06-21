@@ -10,6 +10,7 @@ const pkcs11 = require("./lib/pkcs11");
 const softhsm2 = require("./lib/softhsm2");
 const smime = require("./lib/smime");
 const ocsp = require("./lib/ocsp");
+const providers = require("./lib/providers");
 
 var openssl = function(options) {
 
@@ -38,6 +39,7 @@ var openssl = function(options) {
 	this.softhsm2 = softhsm2;
 	this.smime = smime;
 	this.ocsp = ocsp;
+	this.providers = providers;
 }
 
 module.exports = openssl;
