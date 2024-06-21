@@ -24,7 +24,7 @@ let dilithium3unencrypted = {
 openssl.keypair.generateOQSKey({}, function(err, key) {
     if(err) {
         console.log(err);
-        console.log(key);
+        //console.log(key);
     } else {
         console.log(key);
         openssl.keypair.generateOQSKey(dilithium2encrypted, function(err, key) {
