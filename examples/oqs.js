@@ -1,8 +1,9 @@
 const node_openssl = require('../index.js');
 var openssl = new node_openssl({binpath: '/opt/openssl32/bin/openssl', debug: false});
 
-const algorithm = 'mldsa44'
-//const algorithm = 'dilithium2'
+//const algorithm = 'sphincsshake128fsimple'
+//const algorithm = 'mldsa44'
+const algorithm = 'dilithium5'
 //const algorithm = 'falcon512'
 
 let rootcakeyoptions = {
@@ -211,6 +212,13 @@ openssl.keypair.generateOQSKey(rootcakeyoptions, function(err, rootcakey) {
 																		console.log(err);
 																	} else {
 																		console.log(leafcert.data);
+                                                                        openssl.x509.getOpenSSLCertInfo({cert: leafcert.data}, function(err, out) {
+                                                                            if(err) {
+                                                                                console.log(err);
+                                                                            } else {
+                                                                                console.log(out.data);
+                                                                            }
+                                                                        });
 																	}
 																});
                                                             }
