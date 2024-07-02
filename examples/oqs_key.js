@@ -4,7 +4,7 @@ var openssl = new node_openssl({binpath: '/opt/openssl32/bin/openssl', debug: fa
 //const algorithm = 'sphincsshake128fsimple'
 //const algorithm = 'mldsa44'
 //const algorithm = 'p256_sphincssha2128fsimple'
-const algorithm = 'dilithium5'
+const algorithm = 'sphincsshake192fsimple'
 //const algorithm = 'falcon512'
 
 let options = {
