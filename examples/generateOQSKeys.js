@@ -33,18 +33,27 @@ openssl.keypair.generateOQSKey({}, function(err, key) {
                 console.log(key);
             } else {
                 console.log(key);
-                openssl.keypair.generateOQSKey(dilithium3encrypted, function(err, key) {
+                openssl.keypair.generateOQSKey(dilithium3encrypted, function(err, dilithium3key) {
                     if(err) {
                         console.log(err);
                         console.log(key);
                     } else {
-                        console.log(key);
+                        console.log(dilithium3key);
                         openssl.keypair.generateOQSKey(dilithium3unencrypted, function(err, key) {
                             if(err) {
                                 console.log(err);
                                 console.log(key);
                             } else {
                                 console.log(key);
+                                console.log(dilithium3key.data);
+                                openssl.keypair.importOQSKey({key: dilithium3key.data, password: dilithium3encrypted.encryption.password}, function(err, unencryptedkey) {
+                                    if(err) {
+                                        console.log(err);
+                                        console.log(key);
+                                    } else {
+                                        console.log(unencryptedkey.data);
+                                    }
+                                });
                             }
                         });
                     }
