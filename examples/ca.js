@@ -1,5 +1,5 @@
 const node_openssl = require('../index.js');
-var openssl = new node_openssl({debug: false});
+var openssl = new node_openssl({binpath: '/opt/openssl32/bin/openssl', debug: false});
 
 let rootcarsaoptions = {
     encryption: {
@@ -199,6 +199,13 @@ openssl.keypair.generateRSA(rootcarsaoptions, function(err, rootcarsa) {
 																		console.log(err);
 																	} else {
 																		console.log(leafcert.data);
+																		openssl.x509.getOCSPURI(leafcert.data, function(err, ocspuri) {
+																			if(err) {
+																				console.log(err);
+																			} else {
+																				console.log(ocspuri);
+																			}
+																		});
 																	}
 																});
 															}
