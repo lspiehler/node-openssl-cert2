@@ -2,7 +2,7 @@ const node_openssl = require('../index.js');
 var openssl = new node_openssl({binpath: '/opt/openssl32/bin/openssl', debug: false});
 
 let options = {
-    hostname: 'piratepay.hamptonu.edu',
+    hostname: 'prov.femsasalud.com',
     port: 443,
     starttls: false,
     protocol: 'https',
@@ -58,3 +58,8 @@ openssl.x509.getCertFromNetwork(options, function(err, result) {
         });
     }
 });
+
+//https://github.com/openssl/openssl/issues/21296
+//OPENSSL_CONF=/path/to/the/config/file/above.cnf
+
+//https://pipeawk.com/index.php/2022/05/19/openssl-enable-legacy-renegotiation/
