@@ -2,7 +2,7 @@ const node_openssl = require('../index.js');
 var openssl = new node_openssl({binpath: '/opt/openssl32/bin/openssl', debug: false});
 
 let options = {
-    hostname: 'prov.femsasalud.com',
+    hostname: 'pq.cloudflareresearch.com',
     port: 443,
     starttls: false,
     protocol: 'https',
@@ -48,6 +48,7 @@ openssl.x509.getCertFromNetwork(options, function(err, result) {
         console.log(err);
         console.log(result);
     } else {
+        console.log(result);
         console.log(result.data[0]);
         openssl.x509.getOCSPURI(result.data[0], function(err, ocspuri) {
             if(err) {
