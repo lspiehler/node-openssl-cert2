@@ -18,7 +18,7 @@ openssl.x509.TLSHandshake(options, function(err, result) {
         console.log(err);
         console.log(result);
     } else {
-        console.log(result);
+        //console.log(result);
         console.log(result.data);
     }
 });
