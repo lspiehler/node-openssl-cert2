@@ -1,5 +1,5 @@
 const node_openssl = require('../index.js');
-var openssl = new node_openssl({debug: false});
+var openssl = new node_openssl({binpath: '/opt/openssl32/bin/openssl', debug: false});
 var moment = require('moment');
 
 var recipcacsroptions = {
@@ -112,6 +112,8 @@ var sendercsroptions = {
     }
 }
 
+var format = 'SMIME'
+
 openssl.keypair.generateRSA({}, function(err, reciprootcarsa) {
     if(err) {
         console.log(err);
@@ -182,12 +184,13 @@ openssl.keypair.generateRSA({}, function(err, reciprootcarsa) {
                                                                                                 console.log(err);
                                                                                             } else {
                                                                                                 console.log(sendercert);
-                                                                                                openssl.smime.encrypt({cert: recipcert.data, data: 'this is my secret'}, function(err, encrypt) {
+                                                                                                openssl.smime.encrypt({format: format, cert: recipcert.data, data: 'this is my secret'}, function(err, encrypt) {
                                                                                                     if(err) {
                                                                                                         console.log(err);
                                                                                                     } else {
                                                                                                         console.log(encrypt.data);
                                                                                                         openssl.smime.sign({
+                                                                                                            format: format,
                                                                                                             cert: sendercert.data,
                                                                                                             key: senderrsa.data,
                                                                                                             data: encrypt.data
@@ -196,12 +199,13 @@ openssl.keypair.generateRSA({}, function(err, reciprootcarsa) {
                                                                                                                 console.log(err);
                                                                                                             } else {
                                                                                                                 console.log(signed.data);
-                                                                                                                openssl.smime.verify({data: signed.data, ca: senderrootcacert.data}, function(err, verify) {
+                                                                                                                openssl.smime.verify({format: format, data: signed.data, ca: senderrootcacert.data}, function(err, verify) {
                                                                                                                     if(err) {
                                                                                                                         console.log(err);
                                                                                                                     } else {
                                                                                                                         console.log(verify);
                                                                                                                         openssl.smime.decrypt({
+                                                                                                                            format: format,
                                                                                                                             cert: recipcert.data,
                                                                                                                             key: reciprsa.data,
                                                                                                                             data: verify.data
