@@ -1,6 +1,6 @@
 const node_openssl = require('../index.js');
 const binary = require('../lib/binary/index.js');
-var openssl = new node_openssl({debug: false});
+var openssl = new node_openssl({binpath: '/opt/openssl32/bin/openssl', debug: false});
 
 let rootcarsaoptions = {
     encryption: {
@@ -214,6 +214,20 @@ openssl.keypair.generateRSA(rootcarsaoptions, function(err, rootcarsa) {
 																				console.log(err);
 																			} else {
 																				console.log(crl.data);
+																				openssl.crl.convertFormat({crl: crl.data}, function(err, dercrl) {
+																					if(err) {
+																						console.log(err);
+																					} else {
+																						console.log(typeof dercrl.data);
+																						openssl.crl.convertFormat({inform: 'DER', outform: 'PEM', crl: dercrl.data}, function(err, pemcrl) {
+																							if(err) {
+																								console.log(err);
+																							} else {
+																								console.log(pemcrl.data.toString());
+																							}
+																						});
+																					}
+																				});
 																			}
 																		});
 																	}

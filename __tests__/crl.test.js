@@ -196,7 +196,15 @@ test('Generate root ca, intermediate, sign leaf cert, revoke and generate crl', 
                                         }, function(err, crl) {
                                             expect(err).toEqual(false);
                                             expect(crl.data.split('\n')[0].trim()).toBe("-----BEGIN X509 CRL-----")
-                                            done();
+                                            openssl.crl.convertFormat({crl: crl.data}, function(err, dercrl) {
+                                                expect(err).toEqual(false);
+                                                expect(typeof(dercrl.data)).toBe("object")
+                                                openssl.crl.convertFormat({inform: 'DER', outform: 'PEM', crl: dercrl.data}, function(err, pemcrl) {
+                                                    expect(err).toEqual(false);
+                                                    expect(pemcrl.data.toString().split('\n')[0].trim()).toBe("-----BEGIN X509 CRL-----")
+                                                    done();
+                                                });
+                                            });
                                         });
                                     });
                                 });
