@@ -213,7 +213,7 @@ openssl.keypair.generateRSA({}, function(err, reciprootcarsa) {
                                                                                                                             if(err) {
                                                                                                                                 console.log(err);
                                                                                                                             } else {
-                                                                                                                                console.log(decrypt);
+                                                                                                                                console.log(decrypt.data.toString());
                                                                                                                             }
                                                                                                                         });
                                                                                                                     }
