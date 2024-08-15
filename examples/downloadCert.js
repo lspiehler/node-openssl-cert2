@@ -2,7 +2,7 @@ const node_openssl = require('../index.js');
 var openssl = new node_openssl({binpath: '/opt/openssl32/bin/openssl', debug: false});
 
 let options = {
-    hostname: 'pq.cloudflareresearch.com',
+    hostname: 'norbertboron.com',
     port: 443,
     starttls: false,
     protocol: 'https',
