@@ -1,5 +1,5 @@
 const node_openssl = require('../index.js');
-var openssl = new node_openssl({debug: false});
+var openssl = new node_openssl();
 var moment = require('moment');
 
 const secret = 'this is my secret';
@@ -181,7 +181,7 @@ test('create required certs and test smime functions', done => {
                                                                     data: verify.data
                                                                 }, function(err, decrypt) {
                                                                     expect(err).toEqual(false);
-                                                                    expect(decrypt.data).toBe(secret)
+                                                                    expect(decrypt.data.toString()).toBe(secret)
                                                                     done();
                                                                 });
                                                             });
