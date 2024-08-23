@@ -218,6 +218,13 @@ openssl.keypair.generateOQSKey(rootcakeyoptions, function(err, rootcakey) {
                                                                                 console.log(err);
                                                                             } else {
                                                                                 console.log(out.data);
+																				openssl.x509.createPKCS7({certs: [rootcacert.data, subcacert.data, leafcert.data], outform: 'PEM'}, function(err, pkcs7) {
+																					if(err) {
+																						console.log(err);
+																					} else {
+																						console.log(pkcs7.data);
+																					}
+																				});
                                                                             }
                                                                         });
 																	}

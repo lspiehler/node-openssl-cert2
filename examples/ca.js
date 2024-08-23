@@ -194,16 +194,24 @@ openssl.keypair.generateRSA(rootcarsaoptions, function(err, rootcarsa) {
 																	ca: subcacert.data,
 																	csr: csrcert.data,
 																	options: csroptions
-																}, function(err, leafcert) {
+																}, function(err, leafcert, cmd) {
 																	if(err) {
 																		console.log(err);
 																	} else {
 																		console.log(leafcert.data);
-																		openssl.x509.getOCSPURI(leafcert.data, function(err, ocspuri) {
+																		/*openssl.x509.getOCSPURI(leafcert.data, function(err, ocspuri) {
 																			if(err) {
 																				console.log(err);
 																			} else {
 																				console.log(ocspuri);
+																			}
+																		});*/
+																		//console.log([rootcacert.data, subcacert.data, leafcert.data].join('\n'));
+																		openssl.x509.createPKCS7({certs: [rootcacert.data, subcacert.data, leafcert.data], outform: 'DER'}, function(err, pkcs7) {
+																			if(err) {
+																				console.log(err);
+																			} else {
+																				console.log(pkcs7.data);
 																			}
 																		});
 																	}
