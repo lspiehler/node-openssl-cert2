@@ -223,8 +223,16 @@ openssl.keypair.generateOQSKey(rootcakeyoptions, function(err, rootcakey) {
 																						console.log(err);
 																					} else {
 																						console.log(pkcs7.data);
+																						openssl.x509.convertPEMtoDER(rootcacert.data, function(err, der) {
+																							if(err) {
+																								console.log(err);
+																							} else {
+																								console.log(der.data);
+																							}
+																						});
 																					}
 																				});
+																				
                                                                             }
                                                                         });
 																	}
