@@ -84,6 +84,6 @@ openssl.ocsp.query({cert: cert, cacert: cacert,  hash:hash, uri: uri}, function(
     if(err) {
         console.log(err);
     } else {
-        console.log(ocsp.data);
+        console.log(ocsp.command);
     }
 })
