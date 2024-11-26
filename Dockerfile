@@ -14,7 +14,7 @@ ARG SIG_ALG="dilithium3"
 
 ARG BASE_IMAGE="node:lts-alpine3.20"
 
-FROM ${BASE_IMAGE} as buildopenssl
+FROM ${BASE_IMAGE} AS buildopenssl
 ARG INSTALLDIR_OPENSSL
 ARG INSTALLDIR_LIBOQS
 ARG LIBOQS_BUILD_DEFINES
@@ -41,7 +41,7 @@ WORKDIR /optbuild/openssl
 RUN LDFLAGS="-Wl,-rpath -Wl,${INSTALLDIR_OPENSSL}/lib64" ./config enable-ssl3 enable-ssl3-method enable-weak-ssl-ciphers enable-des enable-dsa enable-rc4 enable-dh shared --prefix=${INSTALLDIR_OPENSSL} && \
     make ${MAKE_DEFINES} && make install && if [ -d ${INSTALLDIR_OPENSSL}/lib64 ]; then ln -s ${INSTALLDIR_OPENSSL}/lib64 ${INSTALLDIR_OPENSSL}/lib; fi && if [ -d ${INSTALLDIR_OPENSSL}/lib ]; then ln -s ${INSTALLDIR_OPENSSL}/lib ${INSTALLDIR_OPENSSL}/lib64; fi
 
-FROM ${BASE_IMAGE} as buildliboqs
+FROM ${BASE_IMAGE} AS buildliboqs
 # Take in all global args
 ARG INSTALLDIR_OPENSSL
 ARG INSTALLDIR_LIBOQS
@@ -66,7 +66,7 @@ RUN mkdir /optbuild && cd /optbuild && git clone --depth 1 --branch main https:/
 WORKDIR /optbuild/liboqs
 RUN mkdir build && cd build && cmake -G"Ninja" .. -DOQS_ALGS_ENABLED=All -DOPENSSL_ROOT_DIR=${INSTALLDIR_OPENSSL} ${LIBOQS_BUILD_DEFINES} -DCMAKE_INSTALL_PREFIX=${INSTALLDIR_LIBOQS} && ninja install
 
-FROM ${BASE_IMAGE} as buildoqsprovider
+FROM ${BASE_IMAGE} AS buildoqsprovider
 # Take in all global args
 ARG INSTALLDIR_OPENSSL
 ARG INSTALLDIR_LIBOQS
@@ -96,7 +96,7 @@ WORKDIR ${INSTALLDIR_OPENSSL}/bin
 # set path to use 'new' openssl. Dyn libs have been properly linked in to match
 ENV PATH="${INSTALLDIR_OPENSSL}/bin:${PATH}"
 
-ARG CACHE_DATE=2024-08-10
+ARG CACHE_DATE=2024-09-15
 
 # update config to allow unsafe renegotiation
 RUN sed -i '/\[system_default_sect\]/a Options = UnsafeLegacyRenegotiation' /opt/openssl32/ssl/openssl.cnf
