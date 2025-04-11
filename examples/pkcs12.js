@@ -203,7 +203,8 @@ openssl.keypair.generateRSA(rootcarsaoptions, function(err, rootcarsa) {
                                                                             cert: leafcert.data,
                                                                             key: rsacert.data,
                                                                             ca: rootcacert.data + '\r\n' + subcacert.data,
-                                                                            pkcs12pass: 'test'
+                                                                            pkcs12pass: 'test',
+																			legacy: true
                                                                         }, function(err, pkcs12) {
                                                                             if(err) {
                                                                                 console.log(err);
@@ -211,19 +212,20 @@ openssl.keypair.generateRSA(rootcarsaoptions, function(err, rootcarsa) {
                                                                                 //fs.writeFile('./test_files/pkcs12.pfx', pkcs12.data, function(err) {
                                                 
                                                                                 //});
-                                                                                openssl.x509.getKeyFromPKCS12({pkcs12: pkcs12.data, password: 'test'}, function(err, key) {
+																				// console.log(pkcs12);
+                                                                                openssl.x509.getKeyFromPKCS12({pkcs12: pkcs12.data, password: 'test', legacy: true}, function(err, key) {
                                                                                     if(err) {
                                                                                         console.log(err);
                                                                                     } else {
                                                                                         //console.log(key.data);
-                                                                                        openssl.x509.getCertFromPKCS12({pkcs12: pkcs12.data, password: 'test'}, function(err, cert) {
+                                                                                        openssl.x509.getCertFromPKCS12({pkcs12: pkcs12.data, password: 'test', legacy: true}, function(err, cert) {
                                                                                             if(err) {
-                                                                                                //console.log(err);
+                                                                                                console.log(err);
                                                                                             } else {
                                                                                                 //console.log(cert.data);
-                                                                                                openssl.x509.getChainFromPKCS12({pkcs12: pkcs12.data, password: 'test'}, function(err, chain) {
+                                                                                                openssl.x509.getChainFromPKCS12({pkcs12: pkcs12.data, password: 'test', legacy: true}, function(err, chain) {
                                                                                                     if(err) {
-                                                                                                        //console.log(err);
+                                                                                                        console.log(err);
                                                                                                     } else {
                                                                                                         console.log(chain.data[1]);
                                                                                                     }
