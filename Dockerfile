@@ -33,7 +33,7 @@ RUN apk add build-base linux-headers \
             git wget
 
 # get current openssl sources
-RUN mkdir /optbuild && cd /optbuild && git clone --depth 1 --branch openssl-3.5.0 --single-branch https://github.com/openssl/openssl.git
+RUN mkdir /optbuild && cd /optbuild && git clone --depth 1 --branch openssl-3.5.4 --single-branch https://github.com/openssl/openssl.git
 #mkdir /optbuild && cd /optbuild && git clone --branch master https://github.com/openssl/openssl.git &&  cd /optbuild/openssl && git checkout db2ac4f
 
 # build OpenSSL3
