@@ -1,7 +1,8 @@
 const node_openssl = require('../index.js');
 var openssl = new node_openssl({binpath: 'openssl', debug: false});
 
-const lib = '/usr/lib/x86_64-linux-gnu/libykcs11.so';
+// const lib = '/usr/lib/x86_64-linux-gnu/libykcs11.so';
+const lib = '/usr/lib/softhsm/libsofthsm2.so';
 
 var csroptions = {
 	hash: 'sha512',
@@ -156,6 +157,40 @@ openssl.pkcs11.listSlots({modulePath: lib}, function(err, slots, cmd) {
                                                                     console.log(err);
                                                                 } else {
                                                                     console.log(crl.data);
+                                                                    openssl.x509.selfSignCSR({
+                                                                        options: csroptions,
+                                                                        csr: csrcert.data,
+                                                                        pkcs11: {
+                                                                            serial: slots.data[0]['serial num'],
+                                                                            objectid: objects.data[0]['ID'],
+                                                                            pin: '123456',
+                                                                            modulePath: lib
+                                                                        }
+                                                                    }, function(err, cert) {
+                                                                        if(err) {
+                                                                            console.log(err);
+                                                                        } else {
+                                                                            console.log('SELF SIGNED CERT');
+                                                                            console.log(cert.data);
+                                                                            openssl.smime.encrypt({
+                                                                                format: 'SMIME',
+                                                                                cert: object.data,
+                                                                                data: 'this is my secret',
+                                                                                pkcs11: {
+                                                                                    serial: slots.data[0]['serial num'],
+                                                                                    objectid: objects.data[0]['ID'],
+                                                                                    pin: '123456',
+                                                                                    modulePath: lib
+                                                                                }
+                                                                            }, function(err, encrypt) {
+                                                                                if(err) {
+                                                                                    console.log(err);
+                                                                                } else {
+                                                                                    console.log(encrypt.data);
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                    });
                                                                 }
                                                             });
                                                         }
