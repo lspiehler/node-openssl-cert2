@@ -101,6 +101,17 @@ ARG CACHE_DATE=2024-09-15
 # update config to allow unsafe renegotiation
 RUN sed -i '/\[system_default_sect\]/a Options = UnsafeLegacyRenegotiation' /opt/openssl32/ssl/openssl.cnf
 
+RUN apk add pkgconfig meson opensc
+
+RUN mkdir /optbuild && cd /optbuild && git clone --depth 1 --branch v1.1.0 https://github.com/latchset/pkcs11-provider.git
+
+WORKDIR /optbuild/pkcs11-provider
+RUN PKG_CONFIG_PATH="${INSTALLDIR_OPENSSL}/lib64/pkgconfig" meson setup builddir && meson compile -C builddir && meson install -C builddir
+
+# cleanup
+RUN apk del meson
+RUN rm -Rf /optbuild
+
 LABEL maintainer="Lyas Spiehler"
 
 WORKDIR /var/node
