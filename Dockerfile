@@ -103,7 +103,7 @@ RUN sed -i '/\[system_default_sect\]/a Options = UnsafeLegacyRenegotiation' /opt
 
 RUN apk add pkgconfig meson opensc
 
-RUN mkdir /optbuild && cd /optbuild && git clone --depth 1 --branch v1.1.0 https://github.com/latchset/pkcs11-provider.git
+RUN cd /optbuild && git clone --depth 1 --branch v1.1.0 https://github.com/latchset/pkcs11-provider.git
 
 WORKDIR /optbuild/pkcs11-provider
 RUN PKG_CONFIG_PATH="${INSTALLDIR_OPENSSL}/lib64/pkgconfig" meson setup builddir && meson compile -C builddir && meson install -C builddir
