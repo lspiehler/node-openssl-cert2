@@ -1,5 +1,5 @@
 const node_openssl = require('../index.js');
-var openssl = new node_openssl({binpath: 'openssl', debug: false});
+var openssl = new node_openssl({binpath: '/opt/openssl32/bin/openssl', debug: false});
 const fs = require('fs');
 
 const label = 'test';
