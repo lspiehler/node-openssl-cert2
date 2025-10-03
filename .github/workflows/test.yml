@@ -13,33 +13,33 @@ on:
   workflow_dispatch:
 
 jobs:
-  linux-test-ubuntu-22-04:
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        node-version: [20.x, 22.x, 24.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-    steps:
-    - name: Output OpenSSL version
-      run: |
-        openssl version
-    - uses: actions/checkout@v4
-    - name: ⚙️ Install softhsm2 and dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y softhsm2 opensc pkcs11-provider
-    - name: Add user to softhsm group
-      run: |
-        sudo usermod -aG softhsm $USER
-        sudo -s -u ${USER} bash -c 'whoami && groups'
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: sudo npm test
+  # linux-test-ubuntu-22-04:
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     matrix:
+  #       node-version: [20.x, 22.x, 24.x]
+  #       # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+  #   steps:
+  #   - name: Output OpenSSL version
+  #     run: |
+  #       openssl version
+  #   - uses: actions/checkout@v4
+  #   - name: ⚙️ Install softhsm2 and dependencies
+  #     run: |
+  #       sudo apt update
+  #       sudo apt install -y softhsm2 opensc pkcs11-provider
+  #   - name: Add user to softhsm group
+  #     run: |
+  #       sudo usermod -aG softhsm $USER
+  #       sudo -s -u ${USER} bash -c 'whoami && groups'
+  #   - name: Use Node.js ${{ matrix.node-version }}
+  #     uses: actions/setup-node@v4
+  #     with:
+  #       node-version: ${{ matrix.node-version }}
+  #       cache: 'npm'
+  #   - run: npm ci
+  #   - run: npm run build --if-present
+  #   - run: sudo npm test
   linux-test-ubuntu-latest:
     runs-on: ubuntu-latest
     strategy:
