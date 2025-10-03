@@ -11,6 +11,7 @@ const softhsm2 = require("./lib/softhsm2");
 const smime = require("./lib/smime");
 const ocsp = require("./lib/ocsp");
 const providers = require("./lib/providers");
+const config = require("./lib/config");
 
 var openssl = function(options) {
 
@@ -26,6 +27,9 @@ var openssl = function(options) {
 		}
 		if(options.libdir) {
 			binary.pkcs11Tool.setLibDir(options.libdir);
+		}
+		if(options.pkcs11modulepath) {
+			config.pkcs11ModulePath.set(options.pkcs11modulepath);
 		}
 	}
 
