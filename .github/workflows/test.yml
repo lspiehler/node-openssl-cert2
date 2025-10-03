@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [20.x, 22.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     steps:
     - name: Output OpenSSL version
@@ -54,7 +54,7 @@ jobs:
     - name: ⚙️ Install softhsm2 and dependencies
       run: |
         sudo apt update
-        sudo apt install -y softhsm2 opensc libengine-pkcs11-openssl
+        sudo apt install -y softhsm2 opensc pkcs11-provider
     - name: Add user to softhsm group
       run: |
         sudo usermod -aG softhsm $USER
