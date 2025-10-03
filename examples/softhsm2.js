@@ -1,5 +1,5 @@
 const node_openssl = require('../index.js');
-var openssl = new node_openssl({binpath: '/opt/openssl32/bin/openssl', debug: false});
+var openssl = new node_openssl({binpath: '/opt/openssl32/bin/openssl', pkcs11modulepath: '/opt/openssl32/lib64/ossl-modules/pkcs11.so'});
 const fs = require('fs');
 
 const label = 'test';
@@ -180,6 +180,7 @@ fs.stat(lib, function(err, stat) {
 												}, function(err, rootcacert) {
 													if(err) {
 														console.log(err);
+														console.log(rootcacert);
 													} else {
 														console.log('TESTING');
 														console.log(rootcacert);

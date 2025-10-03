@@ -1,4 +1,5 @@
 const node_openssl = require('../index.js');
+// var openssl = new node_openssl({pkcs11modulepath: '/opt/openssl32/lib64/ossl-modules/pkcs11.so'});
 var openssl = new node_openssl();
 const fs = require('fs');
 
