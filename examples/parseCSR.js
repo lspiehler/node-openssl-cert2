@@ -128,6 +128,28 @@ Z9sFqOXZk/sPLv0+bdCHRJY9SUD4qog+kPZD3Zk=
 -----END CERTIFICATE REQUEST-----
 `
 
+// example of a bad csr
+// let csr = `
+// -----BEGIN CERTIFICATE REQUEST-----
+// MIICuzCCAaMCAQIwQTEtMCsGA1UEAwwkU0NFUCBDQSBmb3IgQUkgTmV0d29yayBU
+// cmFpbmluZyBMdGQuMRAwDgYDVQQLDAcxNDE0MjYwMIIBIjANBgkqhkiG9w0BAQEF
+// AAOCAQ8AMIIBCgKCAQEA42V8GDz5sohs8Aq23skmQ9/2g2VwziGuVOS5+T1U2dD6
+// Ur1z9sc4rtb3uJqGBFQ/H1D2y8Ke9WK1hGoeCScs9BI7HixvHJd0ZKVTiumLTqQ4
+// OCr5W/d2zrUPGFDGVyj3dlyn51uMMMZzZT8YFubhphyBgyLUsY39wHo/gXX6iYyv
+// bW17+TWhs4tKnFKAYHAuqz2g0z/waEVW578Ohr34gf0D8NG2XXPOw3gWNrccdWKJ
+// 9Z4Dv6xCZU/ZF+9AA34Xvy/zmTNnEPieymWfKvr08RkYCK2sxo+9ZTtUK6vATRCV
+// 3uUykoCxMLw4oQzUeLwywz+EWTVpsnsW7NwUq3rmawIDAQABoDUwMwYJKoZIhvcN
+// AQkOMSYwJDASBgNVHRMBAf8ECDAGAQH/AgEAMA4GA1UdDwEB/wQEAwIChDANBgkq
+// hkiG9w0BAQUFAAOCAQEAGpD488He8d+MFjnghCY/ptWeX/Zr/3ExeDM1lxbXn2Ys
+// uFh6XTBB46IDvPguJy1Wt5U5VHdsF69xeUYfQwnuhVtVIP2+mPdyP0TYCAftcLtE
+// lqFcgQfaTguU5R+XoQboukoLTi4E+w4swbVdXqVl+1RF0CYqKjAMUOesWIJc55tc
+// E1ntB9elpSP1UMvFOnock6piQsmQI/Abo+R46eXmEQr+bAfdWQrxyQ2H9LcAaYGq
+// 9Z8QTajlk/ifrWKniH7+ImNOFWwPmjlIbOJnWQIpkR1oqvn/1Yb6F7b/oR1dxxvo
+// hgseeLbJu3dgGKikXv4L3Z14zs1ToG4DD9nBUjd2kA==
+// -----END CERTIFICATE REQUEST-----
+// `
+
 openssl.csr.parse({csr: csr}, function(err, result) {
     console.log(result.data.extensions);
+    console.log(err);
 })
