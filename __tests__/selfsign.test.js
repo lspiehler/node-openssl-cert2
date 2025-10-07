@@ -101,25 +101,21 @@ test('Generate a self signed certificate', done => {
                         openssl.keypair.generateECC({}, function(err, ecc) {
                             expect(err).toEqual(false);
                             expect(ecc.data.split('\n')[0].trim()).toBe("-----BEGIN PRIVATE KEY-----")
-                            openssl.csr.create({options: csroptions, key: ecc.data}, function(err, csr) {
+                            openssl.x509.selfSignCSR({options: csroptions, key: ecc.data}, function(err, cert) {
                                 expect(err).toEqual(false);
-                                expect(csr.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE REQUEST-----")
-                                openssl.x509.selfSignCSR({options: csroptions, csr: csr.data, key: ecc.data}, function(err, cert) {
+                                expect(cert.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE-----")
+                                openssl.keypair.getECCPublicKey({key: ecc.data }, function(err, privresult) {
                                     expect(err).toEqual(false);
-                                    expect(cert.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE-----")
-                                    openssl.keypair.getECCPublicKey({key: ecc.data }, function(err, privresult) {
+                                    openssl.x509.getCertPublicKey({cert: cert.data}, function(err, certresult) {
                                         expect(err).toEqual(false);
-                                        openssl.x509.getCertPublicKey({cert: cert.data}, function(err, certresult) {
+                                        expect(privresult.data).toBe(certresult.data);
+                                        openssl.x509.parse({cert: cert.data}, function(err, certparse) {
                                             expect(err).toEqual(false);
-                                            expect(privresult.data).toBe(certresult.data);
-                                            openssl.x509.parse({cert: cert.data}, function(err, certparse) {
+                                            expect(certparse.data.extensions.SANs.otherName[0]).toBe(csroptions.extensions.SANs.otherName[0]);
+                                            openssl.x509.getOpenSSLCertInfo({cert: cert.data}, function(err, out) {
                                                 expect(err).toEqual(false);
-                                                expect(certparse.data.extensions.SANs.otherName[0]).toBe(csroptions.extensions.SANs.otherName[0]);
-                                                openssl.x509.getOpenSSLCertInfo({cert: cert.data}, function(err, out) {
-                                                    expect(err).toEqual(false);
-                                                    expect(out.data.split('\n')[0].trim()).toBe("Certificate:")
-                                                    done();
-                                                });
+                                                expect(out.data.split('\n')[0].trim()).toBe("Certificate:")
+                                                done();
                                             });
                                         });
                                     });

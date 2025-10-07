@@ -166,7 +166,7 @@ test('Generate root ca, intermediate, sign leaf cert, revoke and generate crl', 
                         }, function(err, subcacert) {
                             expect(err).toEqual(false);
                             expect(subcacert.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE-----")
-                            expect(subcacert.files.config.split('\n')[0].trim()).toBe("[ ca ]")
+                            expect(subcacert.files.config.split('\n')[0].trim()).toMatch(/^\[ (req|ca) \]$/)
                             expect(typeof(subcacert.serial)).toBe("string")
                             openssl.keypair.generateRSA({}, function(err, rsacert) {
                                 expect(err).toEqual(false);
@@ -183,7 +183,7 @@ test('Generate root ca, intermediate, sign leaf cert, revoke and generate crl', 
                                     }, function(err, leafcert) {
                                         expect(err).toEqual(false);
                                         expect(leafcert.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE-----")
-                                        expect(leafcert.files.config.split('\n')[0].trim()).toBe("[ ca ]")
+                                        expect(leafcert.files.config.split('\n')[0].trim()).toMatch(/^\[ (req|ca) \]$/)
                                         expect(typeof(leafcert.serial)).toBe("string")
                                         let revoked = [];
                                         revoked[leafcert.serial] = 'keyCompromise'

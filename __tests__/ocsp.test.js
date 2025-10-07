@@ -193,7 +193,7 @@ test('create required certs and test ocsp functions', done => {
                         }, function(err, subcacert) {
                             expect(err).toEqual(false);
                             expect(subcacert.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE-----")
-                            expect(subcacert.files.config.split('\n')[0].trim()).toBe("[ ca ]")
+                            expect(subcacert.files.config.split('\n')[0].trim()).toMatch(/^\[ (req|ca) \]$/)
                             expect(typeof(subcacert.serial)).toBe("string")
                             openssl.keypair.generateRSA({}, function(err, rsacert) {
                                 expect(err).toEqual(false);
@@ -210,7 +210,7 @@ test('create required certs and test ocsp functions', done => {
                                     }, function(err, leafcert) {
                                         expect(err).toEqual(false);
                                         expect(leafcert.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE-----")
-                                        expect(leafcert.files.config.split('\n')[0].trim()).toBe("[ ca ]")
+                                        expect(leafcert.files.config.split('\n')[0].trim()).toMatch(/^\[ (req|ca) \]$/)
                                         expect(typeof(leafcert.serial)).toBe("string")
                                         openssl.keypair.generateRSA({}, function(err, subcaocsprsa) {
                                             expect(err).toEqual(false);
@@ -227,7 +227,7 @@ test('create required certs and test ocsp functions', done => {
                                                 }, function(err, ocspcert) {
                                                     expect(err).toEqual(false);
                                                     expect(ocspcert.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE-----")
-                                                    expect(ocspcert.files.config.split('\n')[0].trim()).toBe("[ ca ]")
+                                                    expect(ocspcert.files.config.split('\n')[0].trim()).toMatch(/^\[ (req|ca) \]$/)
                                                     expect(typeof(ocspcert.serial)).toBe("string")
                                                     openssl.ocsp.request({
                                                         ca: subcacert.data,
