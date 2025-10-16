@@ -10,7 +10,7 @@
     "build": "node ./lib/x509/buildNameMappings.js"
   },
   "name": "node-openssl-cert2",
-  "version": "0.7.23",
+  "version": "0.7.24",
   "description": "Node.JS OpenSSL wrapper",
   "main": "index.js",
   "directories": {
