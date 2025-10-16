@@ -1,5 +1,6 @@
 const node_openssl = require('../index.js');
-var openssl = new node_openssl({binpath: '/opt/openssl32/bin/openssl', debug: false});
+// var openssl = new node_openssl({binpath: '/opt/openssl32/bin/openssl', debug: false});
+var openssl = new node_openssl();
 
 let rsaoptionsa = {
     encryption: {
@@ -139,7 +140,8 @@ openssl.keypair.generateRSA(rsaoptionsa, function(err, rsa) {
 																						if(err) {
 																							console.log(err);
 																						} else {
-																							console.log(certparse.data.extensions.SANs);
+																							console.log(certparse.data);
+																							console.log(openssl.x509.getDistinguishedName(certparse.data.subject));
 																							if(certresult.data == privresult.data) {
 																								console.log('success');
 																								openssl.x509.getOpenSSLCertInfo({cert: cert.data}, function(err, out) {
