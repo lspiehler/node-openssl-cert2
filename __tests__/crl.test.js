@@ -1,5 +1,6 @@
 const node_openssl = require('../index.js');
 var openssl = new node_openssl();
+var moment = require('moment');
 
 test('Generate root ca, intermediate, sign leaf cert, revoke and generate crl', done => {
     let rootcarsaoptions = {
@@ -185,24 +186,32 @@ test('Generate root ca, intermediate, sign leaf cert, revoke and generate crl', 
                                         expect(leafcert.data.split('\n')[0].trim()).toBe("-----BEGIN CERTIFICATE-----")
                                         expect(leafcert.files.config.split('\n')[0].trim()).toMatch(/^\[ (req|ca) \]$/)
                                         expect(typeof(leafcert.serial)).toBe("string")
-                                        let revoked = [];
-                                        revoked[leafcert.serial] = 'keyCompromise'
-                                        openssl.crl.generate({
-                                            key: subcarsa.data,
-                                            password: subcarsaoptions.encryption.password,
-                                            ca: subcacert.data,
-                                            crldays: 90,
-                                            revoked: revoked
-                                        }, function(err, crl) {
+                                        openssl.x509.parse({cert: leafcert.data}, function(err, parsedleafcert) {
                                             expect(err).toEqual(false);
-                                            expect(crl.data.split('\n')[0].trim()).toBe("-----BEGIN X509 CRL-----")
-                                            openssl.crl.convertFormat({crl: crl.data}, function(err, dercrl) {
+                                            let database = [
+                                                ['E', moment.utc(new Date()).add(-5, 'days').toDate(), null, null, '4FD034B0A6140FE7ACB170F7530E078201D46992', 'unknown', '/C=US/CN=lxer.com'],
+                                                ['R', moment.utc(new Date()).add(200, 'days').toDate(), moment.utc(new Date()).add(-20, 'days').toDate(), 'certificateHold', '5AB123C0D2341FE7ACB170F7530E078201D46993', 'unknown', '/C=US/CN=test.com'],
+                                                ['R', moment.utc(new Date()).add(200, 'days').toDate(), moment.utc(new Date()).toDate(), 'keyCompromise', parsedleafcert.data.attributes['Serial Number'].split(':').join('').toUpperCase(), 'unknown', openssl.x509.getDistinguishedName(parsedleafcert.data.subject)],
+                                                ['V', moment.utc(new Date()).add(340, 'days').toDate(), null, null, '6BC234D0E3452FE7ACB170F7530E078201D46994', 'unknown', '/C=US/CN=example.com'],
+                                                ['R', moment.utc(new Date()).add(290, 'days').toDate(), moment.utc(new Date()).add(-4005707, 'minutes').toDate(), 'unspecified', '7CD345E0F4563FE7ACB170F7530E078201D46995', 'unknown', '/C=US/CN=foobar.com']
+                                            ]
+                                            openssl.crl.generate({
+                                                key: subcarsa.data,
+                                                password: subcarsaoptions.encryption.password,
+                                                ca: subcacert.data,
+                                                crldays: 90,
+                                                database: openssl.crl.generateIndex(database)
+                                            }, function(err, crl) {
                                                 expect(err).toEqual(false);
-                                                expect(typeof(dercrl.data)).toBe("object")
-                                                openssl.crl.convertFormat({inform: 'DER', outform: 'PEM', crl: dercrl.data}, function(err, pemcrl) {
+                                                expect(crl.data.split('\n')[0].trim()).toBe("-----BEGIN X509 CRL-----")
+                                                openssl.crl.convertFormat({crl: crl.data}, function(err, dercrl) {
                                                     expect(err).toEqual(false);
-                                                    expect(pemcrl.data.toString().split('\n')[0].trim()).toBe("-----BEGIN X509 CRL-----")
-                                                    done();
+                                                    expect(typeof(dercrl.data)).toBe("object")
+                                                    openssl.crl.convertFormat({inform: 'DER', outform: 'PEM', crl: dercrl.data}, function(err, pemcrl) {
+                                                        expect(err).toEqual(false);
+                                                        expect(pemcrl.data.toString().split('\n')[0].trim()).toBe("-----BEGIN X509 CRL-----")
+                                                        done();
+                                                    });
                                                 });
                                             });
                                         });

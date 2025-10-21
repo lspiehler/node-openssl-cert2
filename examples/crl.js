@@ -1,6 +1,8 @@
 const node_openssl = require('../index.js');
 const binary = require('../lib/binary/index.js');
-var openssl = new node_openssl({binpath: '/opt/openssl32/bin/openssl', debug: false});
+var openssl = new node_openssl();
+var moment = require('moment');
+// var openssl = new node_openssl({binpath: '/opt/openssl32/bin/openssl', debug: false});
 
 let rootcarsaoptions = {
     encryption: {
@@ -199,31 +201,47 @@ openssl.keypair.generateRSA(rootcarsaoptions, function(err, rootcarsa) {
 																	if(err) {
 																		console.log(err);
 																	} else {
-																		//console.log(leafcert.data);
-																		let revoked = [];
-																		revoked[leafcert.serial] = 'keyCompromise'
-																		//revoked['6C1B17D5E80FF201A0BCB6BF1502F809E3A3FECE'] = 'superseded'
-																		openssl.crl.generate({
-																			key: subcarsa.data,
-																			password: subcarsaoptions.encryption.password,
-																			ca: subcacert.data,
-																			crldays: 90,
-																			revoked: revoked
-																		}, function(err, crl) {
+																		openssl.x509.parse({cert: leafcert.data}, function(err, parsedleafcert) {
 																			if(err) {
 																				console.log(err);
 																			} else {
-																				console.log(crl.data);
-																				openssl.crl.convertFormat({crl: crl.data}, function(err, dercrl) {
+																				console.log(parsedleafcert.data);
+																				// console.log(leafcert);
+																				// let revoked = [];
+																				// revoked[leafcert.serial] = 'keyCompromise'
+																				let database = [
+																					['E', moment.utc(new Date()).add(-5, 'days').toDate(), null, null, '4FD034B0A6140FE7ACB170F7530E078201D46992', 'unknown', '/C=US/CN=lxer.com'],
+																					['R', moment.utc(new Date()).add(200, 'days').toDate(), moment.utc(new Date()).add(-20, 'days').toDate(), 'certificateHold', '5AB123C0D2341FE7ACB170F7530E078201D46993', 'unknown', '/C=US/CN=test.com'],
+																					['R', moment.utc(new Date()).add(200, 'days').toDate(), moment.utc(new Date()).toDate(), 'keyCompromise', parsedleafcert.data.attributes['Serial Number'].split(':').join('').toUpperCase(), 'unknown', openssl.x509.getDistinguishedName(parsedleafcert.data.subject)],
+																					['V', moment.utc(new Date()).add(340, 'days').toDate(), null, null, '6BC234D0E3452FE7ACB170F7530E078201D46994', 'unknown', '/C=US/CN=example.com'],
+																					['R', moment.utc(new Date()).add(290, 'days').toDate(), moment.utc(new Date()).add(-4005707, 'minutes').toDate(), 'unspecified', '7CD345E0F4563FE7ACB170F7530E078201D46995', 'unknown', '/C=US/CN=foobar.com']
+																				]
+																				//revoked['6C1B17D5E80FF201A0BCB6BF1502F809E3A3FECE'] = 'superseded'
+																				let index = openssl.crl.generateIndex(database);
+																				console.log(index);
+																				openssl.crl.generate({
+																					key: subcarsa.data,
+																					password: subcarsaoptions.encryption.password,
+																					ca: subcacert.data,
+																					crldays: 90,
+																					database: index
+																				}, function(err, crl) {
 																					if(err) {
 																						console.log(err);
 																					} else {
-																						console.log(typeof dercrl.data);
-																						openssl.crl.convertFormat({inform: 'DER', outform: 'PEM', crl: dercrl.data}, function(err, pemcrl) {
+																						console.log(crl.data);
+																						openssl.crl.convertFormat({crl: crl.data}, function(err, dercrl) {
 																							if(err) {
 																								console.log(err);
 																							} else {
-																								console.log(pemcrl.data.toString());
+																								console.log(typeof dercrl.data);
+																								openssl.crl.convertFormat({inform: 'DER', outform: 'PEM', crl: dercrl.data}, function(err, pemcrl) {
+																									if(err) {
+																										console.log(err);
+																									} else {
+																										console.log(pemcrl.data.toString());
+																									}
+																								});
 																							}
 																						});
 																					}

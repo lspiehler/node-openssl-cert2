@@ -1,5 +1,6 @@
 const node_openssl = require('../index.js');
 var openssl = new node_openssl({binpath: 'openssl', debug: false});
+var moment = require('moment');
 
 // const lib = '/usr/lib/x86_64-linux-gnu/libykcs11.so';
 const lib = '/usr/lib/softhsm/libsofthsm2.so';
@@ -142,51 +143,70 @@ openssl.pkcs11.listSlots({modulePath: lib}, function(err, slots, cmd) {
                                                             console.log(leafcert.data);
                                                             let revoked = [];
                                                             revoked[leafcert.serial] = 'keyCompromise'
-                                                            openssl.crl.generate({
-                                                                ca: object.data,
-                                                                crldays: 90,
-                                                                revoked: revoked,
-                                                                pkcs11: {
-                                                                    serial: slots.data[0]['serial num'],
-                                                                    objectid: objects.data[0]['ID'],
-                                                                    pin: '123456',
-                                                                    modulePath: lib
-                                                                }
-                                                            }, function(err, crl) {
+                                                            openssl.x509.parse({cert: leafcert.data}, function(err, parsedleafcert) {
                                                                 if(err) {
                                                                     console.log(err);
                                                                 } else {
-                                                                    console.log(crl.data);
-                                                                    openssl.x509.selfSignCSR({
-                                                                        options: csroptions,
-                                                                        csr: csrcert.data,
+                                                                    console.log(parsedleafcert.data);
+                                                                    // console.log(leafcert);
+                                                                    // let revoked = [];
+                                                                    // revoked[leafcert.serial] = 'keyCompromise'
+                                                                    let database = [
+                                                                        ['E', moment.utc(new Date()).add(-5, 'days').toDate(), null, null, '4FD034B0A6140FE7ACB170F7530E078201D46992', 'unknown', '/C=US/CN=lxer.com'],
+                                                                        ['R', moment.utc(new Date()).add(200, 'days').toDate(), moment.utc(new Date()).add(-20, 'days').toDate(), 'certificateHold', '5AB123C0D2341FE7ACB170F7530E078201D46993', 'unknown', '/C=US/CN=test.com'],
+                                                                        ['R', moment.utc(new Date()).add(200, 'days').toDate(), moment.utc(new Date()).toDate(), 'keyCompromise', parsedleafcert.data.attributes['Serial Number'].split(':').join('').toUpperCase(), 'unknown', openssl.x509.getDistinguishedName(parsedleafcert.data.subject)],
+                                                                        ['V', moment.utc(new Date()).add(340, 'days').toDate(), null, null, '6BC234D0E3452FE7ACB170F7530E078201D46994', 'unknown', '/C=US/CN=example.com'],
+                                                                        ['R', moment.utc(new Date()).add(290, 'days').toDate(), moment.utc(new Date()).add(-4005707, 'minutes').toDate(), 'unspecified', '7CD345E0F4563FE7ACB170F7530E078201D46995', 'unknown', '/C=US/CN=foobar.com']
+                                                                    ]
+                                                                    //revoked['6C1B17D5E80FF201A0BCB6BF1502F809E3A3FECE'] = 'superseded'
+                                                                    let index = openssl.crl.generateIndex(database);
+                                                                    openssl.crl.generate({
+                                                                        ca: object.data,
+                                                                        crldays: 90,
+                                                                        database: index,
                                                                         pkcs11: {
                                                                             serial: slots.data[0]['serial num'],
                                                                             objectid: objects.data[0]['ID'],
                                                                             pin: '123456',
                                                                             modulePath: lib
                                                                         }
-                                                                    }, function(err, cert) {
+                                                                    }, function(err, crl) {
                                                                         if(err) {
                                                                             console.log(err);
                                                                         } else {
-                                                                            console.log('SELF SIGNED CERT');
-                                                                            console.log(cert.data);
-                                                                            openssl.smime.encrypt({
-                                                                                format: 'SMIME',
-                                                                                cert: object.data,
-                                                                                data: 'this is my secret',
+                                                                            console.log(crl.data);
+                                                                            openssl.x509.selfSignCSR({
+                                                                                options: csroptions,
+                                                                                csr: csrcert.data,
                                                                                 pkcs11: {
                                                                                     serial: slots.data[0]['serial num'],
                                                                                     objectid: objects.data[0]['ID'],
                                                                                     pin: '123456',
                                                                                     modulePath: lib
                                                                                 }
-                                                                            }, function(err, encrypt) {
+                                                                            }, function(err, cert) {
                                                                                 if(err) {
                                                                                     console.log(err);
                                                                                 } else {
-                                                                                    console.log(encrypt.data);
+                                                                                    console.log('SELF SIGNED CERT');
+                                                                                    console.log(cert.data);
+                                                                                    openssl.smime.encrypt({
+                                                                                        format: 'SMIME',
+                                                                                        cert: object.data,
+                                                                                        data: 'this is my secret',
+                                                                                        pkcs11: {
+                                                                                            serial: slots.data[0]['serial num'],
+                                                                                            objectid: objects.data[0]['ID'],
+                                                                                            pin: '123456',
+                                                                                            modulePath: lib
+                                                                                        }
+                                                                                    }, function(err, encrypt) {
+                                                                                        if(err) {
+                                                                                            console.log(err);
+                                                                                        } else {
+                                                                                            console.log(encrypt.data);
+                                                                                        }
+                                                                                    });
                                                                                 }
                                                                             });
                                                                         }
