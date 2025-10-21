@@ -1,5 +1,6 @@
 const node_openssl = require('../index.js');
 var openssl = new node_openssl({debug: false});
+var moment = require('moment');
 
 let rootcarsaoptions = {
     encryption: {
@@ -253,20 +254,24 @@ openssl.keypair.generateRSA(rootcarsaoptions, function(err, rootcarsa) {
 																										console.log(err);
 																									} else {
 																										console.log(ocspreq);
-																										openssl.x509.parse({cert: leafcert.data}, function(err, parseleafcert) {
+																										openssl.x509.parse({cert: leafcert.data}, function(err, parsedleafcert) {
 																											if(err) {
 																												console.log(err);
 																											} else {
 																												//console.log(parseleafcert.data.attributes['Serial Number'].split(':').join('').toUpperCase());
 																												let revoked = [];
-																												revoked[parseleafcert.data.attributes['Serial Number'].split(':').join('').toUpperCase()] = 'keyCompromise'
+																												revoked[parsedleafcert.data.attributes['Serial Number'].split(':').join('').toUpperCase()] = 'keyCompromise'
 																												//revoked['6C1B17D5E80FF201A0BCB6BF1502F809E3A3FECE'] = 'superseded'
+																												let database = [
+																													['R', moment.utc(new Date()).add(200, 'days').toDate(), moment.utc(new Date()).toDate(), 'keyCompromise', parsedleafcert.data.attributes['Serial Number'].split(':').join('').toUpperCase(), 'unknown', openssl.x509.getDistinguishedName(parsedleafcert.data.subject)]
+																												]
+																												let index = openssl.crl.generateIndex(database);
 																												openssl.ocsp.response({
 																													key: subcaocsprsa.data,
 																													cert: ocspcert.data,
 																													ca: subcacert.data,
 																													days: 10,
-																													revoked: revoked,
+																													database: index,
 																													request: ocspreq.data,
 																													nonce: false
 																												}, function(err, ocspresp) {

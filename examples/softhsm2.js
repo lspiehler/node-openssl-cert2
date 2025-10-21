@@ -1,6 +1,8 @@
 const node_openssl = require('../index.js');
-var openssl = new node_openssl({binpath: '/opt/openssl32/bin/openssl', pkcs11modulepath: '/opt/openssl32/lib64/ossl-modules/pkcs11.so'});
+var openssl = new node_openssl();
+// var openssl = new node_openssl({binpath: '/opt/openssl32/bin/openssl', pkcs11modulepath: '/opt/openssl32/lib64/ossl-modules/pkcs11.so'});
 const fs = require('fs');
+var moment = require('moment');
 
 const label = 'test';
 const pin = '123456';
@@ -238,18 +240,24 @@ fs.stat(lib, function(err, stat) {
 																									} else {
 																										console.log(leafcert);
 																										console.log(leafcert.data);
-																										openssl.x509.parse({cert: leafcert.data}, function(err, certparse) {
+																										openssl.x509.parse({cert: leafcert.data}, function(err, parsedleafcert) {
 																											if(err) {
 																												console.log(err);
 																											} else {
 																												console.log(csroptions.extensions.SANs.DNS[2]);
-																												console.log(certparse.data.extensions.SANs.DNS[2]);
-																												let revoked = [];
-																												revoked[leafcert.serial] = 'keyCompromise'
+																												console.log(parsedleafcert.data.extensions.SANs.DNS[2]);
+																												let database = [
+																													['E', moment.utc(new Date()).add(-5, 'days').toDate(), null, null, '4FD034B0A6140FE7ACB170F7530E078201D46992', 'unknown', '/C=US/CN=lxer.com'],
+																													['R', moment.utc(new Date()).add(200, 'days').toDate(), moment.utc(new Date()).add(-20, 'days').toDate(), 'certificateHold', '5AB123C0D2341FE7ACB170F7530E078201D46993', 'unknown', '/C=US/CN=test.com'],
+																													['R', moment.utc(new Date()).add(200, 'days').toDate(), moment.utc(new Date()).toDate(), 'keyCompromise', parsedleafcert.data.attributes['Serial Number'].split(':').join('').toUpperCase(), 'unknown', openssl.x509.getDistinguishedName(parsedleafcert.data.subject)],
+																													['V', moment.utc(new Date()).add(340, 'days').toDate(), null, null, '6BC234D0E3452FE7ACB170F7530E078201D46994', 'unknown', '/C=US/CN=example.com'],
+																													['R', moment.utc(new Date()).add(290, 'days').toDate(), moment.utc(new Date()).add(-4005707, 'minutes').toDate(), 'unspecified', '7CD345E0F4563FE7ACB170F7530E078201D46995', 'unknown', '/C=US/CN=foobar.com']
+																												]
+																												let index = openssl.crl.generateIndex(database);
 																												openssl.crl.generate({
 																													ca: rootcacert.data,
 																													crldays: 90,
-																													revoked: revoked,
+																													database: index,
 																													pkcs11: {
 																														serial: softhsm.data['serial num'],
 																														objectid: kpresult.data[0]['ID'],

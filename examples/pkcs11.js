@@ -1,5 +1,6 @@
 const node_openssl = require('../index.js');
 var openssl = new node_openssl({binpath: 'openssl', debug: false});
+var moment = require('moment');
 
 // const lib = '/usr/lib/x86_64-linux-gnu/libykcs11.so';
 const lib = '/usr/lib/softhsm/libsofthsm2.so';

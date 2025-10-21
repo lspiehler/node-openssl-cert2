@@ -1,5 +1,6 @@
 const node_openssl = require('../index.js');
 var openssl = new node_openssl({debug: false});
+var moment = require('moment');
 
 let rootcarsaoptions = {
     encryption: {
@@ -237,29 +238,34 @@ test('create required certs and test ocsp functions', done => {
                                                         expect(err).toEqual(false);
                                                         expect(Buffer.isBuffer(ocspreq.data)).toBe(true)
                                                         expect(ocspreq.text.split('\n')[0].trim()).toBe("OCSP Request Data:")
-                                                        openssl.x509.parse({cert: leafcert.data}, function(err, parseleafcert) {
+                                                        openssl.x509.parse({cert: leafcert.data}, function(err, parsedleafcert) {
                                                             expect(err).toEqual(false);
-                                                            expect(ocspreq.text.indexOf(parseleafcert.data.attributes['Serial Number'].split(':').join('').toUpperCase()) >= 0).toEqual(true)
-                                                            let revoked = [];
-                                                            revoked[parseleafcert.data.attributes['Serial Number'].split(':').join('').toUpperCase()] = 'keyCompromise'
+                                                            expect(ocspreq.text.indexOf(parsedleafcert.data.attributes['Serial Number'].split(':').join('').toUpperCase()) >= 0).toEqual(true)
+                                                            let database = [
+																['R', moment.utc(new Date()).add(200, 'days').toDate(), moment.utc(new Date()).toDate(), 'keyCompromise', parsedleafcert.data.attributes['Serial Number'].split(':').join('').toUpperCase(), 'unknown', openssl.x509.getDistinguishedName(parsedleafcert.data.subject)]
+															]
+															let index = openssl.crl.generateIndex(database);
                                                             openssl.ocsp.response({
                                                                 key: subcaocsprsa.data,
                                                                 cert: ocspcert.data,
                                                                 ca: subcacert.data,
                                                                 days: 10,
-                                                                revoked: revoked,
+                                                                database: index,
                                                                 request: ocspreq.data,
                                                                 nonce: false
                                                             }, function(err, ocsprevokedresp) {
                                                                 expect(err).toEqual(false);
                                                                 expect(ocsprevokedresp.text.indexOf('Cert Status: revoked') >= 0).toEqual(true);
-                                                                revoked[parseleafcert.data.attributes['Serial Number'].split(':').join('').toUpperCase()] = false
+                                                                let database = [
+																	['V', moment.utc(new Date()).add(200, 'days').toDate(), null, null, parsedleafcert.data.attributes['Serial Number'].split(':').join('').toUpperCase(), 'unknown', openssl.x509.getDistinguishedName(parsedleafcert.data.subject)]
+																]
+																let index = openssl.crl.generateIndex(database);
                                                                 openssl.ocsp.response({
                                                                     key: subcaocsprsa.data,
                                                                     cert: ocspcert.data,
                                                                     ca: subcacert.data,
                                                                     days: 10,
-                                                                    revoked: revoked,
+                                                                    database: index,
                                                                     request: ocspreq.data,
                                                                     nonce: false
                                                                 }, function(err, ocspvalidresp) {
