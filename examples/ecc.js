@@ -52,16 +52,23 @@ openssl.keypair.generateECC({format: 'PKCS1'}, function(err, ecc) {
                         console.log(err);
                     } else {
                         console.log(pkcs1.data);
-                        openssl.keypair.convertToPKCS8({key: pkcs1.data, password: ecckeyoptionb.encryption.password, decrypt: true}, function(err, pkcs8again) {
+                        openssl.keypair.convertPEMToDER({key: pkcs1.data, type: 'EC', password: ecckeyoptionb.encryption.password}, function(err, der) {
                             if(err) {
                                 console.log(err);
                             } else {
-                                console.log(pkcs8again.data);
-                                openssl.keypair.convertECCToPKCS1({key: pkcs8again.data}, function(err, pkcs1again) {
+                                console.log(der.data);
+                                openssl.keypair.convertToPKCS8({key: pkcs1.data, password: ecckeyoptionb.encryption.password, decrypt: true}, function(err, pkcs8again) {
                                     if(err) {
                                         console.log(err);
                                     } else {
-                                        console.log(pkcs1again.data);
+                                        console.log(pkcs8again.data);
+                                        openssl.keypair.convertECCToPKCS1({key: pkcs8again.data}, function(err, pkcs1again) {
+                                            if(err) {
+                                                console.log(err);
+                                            } else {
+                                                console.log(pkcs1again.data);
+                                            }
+                                        });
                                     }
                                 });
                             }

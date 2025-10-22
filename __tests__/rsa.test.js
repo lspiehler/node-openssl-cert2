@@ -69,19 +69,39 @@ test('Generate RSA keypair. Test convert, encrypt and decrypt', done => {
     openssl.keypair.generateRSA({}, function(err, rsa) {
         expect(err).toEqual(false);
         expect(rsa.data.split('\n')[0].trim()).toBe("-----BEGIN PRIVATE KEY-----")
-        openssl.keypair.convertRSAToPKCS1({key: rsa.data, encryption: rsaoptions.encryption}, function(err, pkcs1) {
+        openssl.keypair.convertPEMToDER({key: rsa.data, type: 'RSA'}, function(err, der) {
             expect(err).toEqual(false);
-            expect(pkcs1.data.split('\n')[0].trim()).toBe("-----BEGIN RSA PRIVATE KEY-----")
-            openssl.keypair.convertToPKCS8({key: pkcs1.data, password: rsaoptions.encryption.password}, function(err, pkcs8) {
+            expect(der.data).toBeInstanceOf(Buffer);
+            openssl.keypair.convertRSAToPKCS1({key: rsa.data, encryption: rsaoptions.encryption}, function(err, pkcs1) {
                 expect(err).toEqual(false);
-                expect(pkcs8.data.split('\n')[0].trim()).toBe("-----BEGIN ENCRYPTED PRIVATE KEY-----")
-                openssl.keypair.convertRSAToPKCS1({key: pkcs8.data, encryption: rsaoptions.encryption, decrypt: true}, function(err, pkcs1again) {
+                expect(pkcs1.data.split('\n')[0].trim()).toBe("-----BEGIN RSA PRIVATE KEY-----")
+                openssl.keypair.convertPEMToDER({key: pkcs1.data, type: 'RSA', password: rsaoptions.encryption.password}, function(err, der) {
                     expect(err).toEqual(false);
-                    expect(pkcs1again.data.split('\n')[0].trim()).toBe("-----BEGIN RSA PRIVATE KEY-----")
-                    openssl.keypair.convertToPKCS8({key: pkcs1again.data}, function(err, pkcs8again) {
+                    expect(der.data).toBeInstanceOf(Buffer);
+                    openssl.keypair.convertToPKCS8({key: pkcs1.data, password: rsaoptions.encryption.password}, function(err, pkcs8) {
                         expect(err).toEqual(false);
-                        expect(pkcs8again.data.split('\n')[0].trim()).toBe("-----BEGIN PRIVATE KEY-----");
-                        done();
+                        expect(pkcs8.data.split('\n')[0].trim()).toBe("-----BEGIN ENCRYPTED PRIVATE KEY-----")
+                        openssl.keypair.convertPEMToDER({key: pkcs8.data, type: 'RSA', password: rsaoptions.encryption.password, decrypt: true}, function(err, der) {
+                            expect(err).toEqual(false);
+                            expect(der.data).toBeInstanceOf(Buffer);
+                            openssl.keypair.convertRSAToPKCS1({key: pkcs8.data, encryption: rsaoptions.encryption, decrypt: true}, function(err, pkcs1again) {
+                                expect(err).toEqual(false);
+                                expect(pkcs1again.data.split('\n')[0].trim()).toBe("-----BEGIN RSA PRIVATE KEY-----")
+                                openssl.keypair.convertPEMToDER({key: pkcs1again.data, type: 'RSA'}, function(err, der) {
+                                    expect(err).toEqual(false);
+                                    expect(der.data).toBeInstanceOf(Buffer);
+                                    openssl.keypair.convertToPKCS8({key: pkcs1again.data}, function(err, pkcs8again) {
+                                        expect(err).toEqual(false);
+                                        expect(pkcs8again.data.split('\n')[0].trim()).toBe("-----BEGIN PRIVATE KEY-----");
+                                        openssl.keypair.convertPEMToDER({key: pkcs8again.data, type: 'RSA'}, function(err, der) {
+                                            expect(err).toEqual(false);
+                                            expect(der.data).toBeInstanceOf(Buffer);
+                                            done();
+                                        });
+                                    });
+                                });
+                            });
+                        });
                     });
                 });
             });

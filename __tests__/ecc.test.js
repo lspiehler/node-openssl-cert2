@@ -1,4 +1,5 @@
 const node_openssl = require('../index.js');
+const { decrypt } = require('../lib/crypto/index.js');
 var openssl = new node_openssl();
 
 test('List supported curves', done => {
@@ -41,16 +42,32 @@ test('Generate ECC keypairs. Test convert, encrypt and decrypt', done => {
         openssl.keypair.convertToPKCS8({key: ecc.data, password: ecckeyoptionsb.encryption.password}, function(err, pkcs8) {
             expect(err).toEqual(false);
             expect(pkcs8.data.split('\n')[0].trim()).toBe("-----BEGIN ENCRYPTED PRIVATE KEY-----")
-            openssl.keypair.convertECCToPKCS1({key: pkcs8.data, encryption: ecckeyoptionsb.encryption}, function(err, pkcs1) {
+            openssl.keypair.convertPEMToDER({key: pkcs8.data, type: 'EC', password: ecckeyoptionsb.encryption.password, decrypt: true}, function(err, der) {
                 expect(err).toEqual(false);
-                expect(pkcs1.data.split('\n')[0].trim()).toBe("-----BEGIN EC PRIVATE KEY-----")
-                openssl.keypair.convertToPKCS8({key: pkcs1.data, password: ecckeyoptionsb.encryption.password, decrypt: true}, function(err, pkcs8again) {
+                expect(der.data).toBeInstanceOf(Buffer);
+                openssl.keypair.convertECCToPKCS1({key: pkcs8.data, encryption: ecckeyoptionsb.encryption}, function(err, pkcs1) {
                     expect(err).toEqual(false);
-                    expect(pkcs8again.data.split('\n')[0].trim()).toBe("-----BEGIN PRIVATE KEY-----")
-                    openssl.keypair.convertECCToPKCS1({key: pkcs8again.data}, function(err, pkcs1again) {
+                    expect(pkcs1.data.split('\n')[0].trim()).toBe("-----BEGIN EC PRIVATE KEY-----")
+                    openssl.keypair.convertPEMToDER({key: pkcs1.data, type: 'EC', password: ecckeyoptionsb.encryption.password}, function(err, der) {
                         expect(err).toEqual(false);
-                        expect(pkcs1again.data.split('\n')[0].trim()).toBe("-----BEGIN EC PRIVATE KEY-----");
-                        done();
+                        expect(der.data).toBeInstanceOf(Buffer);
+                        openssl.keypair.convertToPKCS8({key: pkcs1.data, password: ecckeyoptionsb.encryption.password, decrypt: true}, function(err, pkcs8again) {
+                            expect(err).toEqual(false);
+                            expect(pkcs8again.data.split('\n')[0].trim()).toBe("-----BEGIN PRIVATE KEY-----")
+                            openssl.keypair.convertPEMToDER({key: pkcs8again.data, type: 'EC' }, function(err, der) {
+                                expect(err).toEqual(false);
+                                expect(der.data).toBeInstanceOf(Buffer);
+                                openssl.keypair.convertECCToPKCS1({key: pkcs8again.data}, function(err, pkcs1again) {
+                                    expect(err).toEqual(false);
+                                    expect(pkcs1again.data.split('\n')[0].trim()).toBe("-----BEGIN EC PRIVATE KEY-----");
+                                    openssl.keypair.convertPEMToDER({key: pkcs1again.data, type: 'EC' }, function(err, der) {
+                                        expect(err).toEqual(false);
+                                        expect(der.data).toBeInstanceOf(Buffer);
+                                        done();
+                                    });
+                                });
+                            });
+                        });
                     });
                 });
             });
