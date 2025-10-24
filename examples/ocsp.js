@@ -72,6 +72,13 @@ var subcaocspcsroptions = {
 	hash: 'sha256',
 	days: 240,
 	extensions: {
+		customOIDs: [
+			{
+				OID: '1.3.6.1.5.5.7.48.1.5',
+				value: 'ASN1:NULL'
+				// value: 'DER:05:00'
+			}
+		],
 		keyUsage: {
 			critical: true,
 			usages: [
@@ -244,6 +251,7 @@ openssl.keypair.generateRSA(rootcarsaoptions, function(err, rootcarsa) {
 																							if(err) {
 																								console.log(err);
 																							} else {
+																								console.log('OCSP Cert:');
 																								console.log(ocspcert.data);
 																								openssl.ocsp.request({
 																									ca: subcacert.data,

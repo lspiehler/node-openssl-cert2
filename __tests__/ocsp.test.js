@@ -84,7 +84,14 @@ var subcaocspcsroptions = {
 				//'serverAuth',
 				'OCSPSigning'
 			]
-		}
+		},
+		customOIDs: [
+			{
+				OID: '1.3.6.1.5.5.7.48.1.5',
+				value: 'ASN1:NULL'
+				// value: 'DER:05:00'
+			}
+		]
 	},
 	subject: {
 		countryName: 'US',
