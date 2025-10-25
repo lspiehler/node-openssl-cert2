@@ -149,6 +149,13 @@ openssl.keypair.generateRSA(rsaoptionsa, function(err, rsa) {
 																										console.log(err);
 																									} else {
 																										console.log(out.data);
+																										openssl.x509.convertPEMtoDER(cert.data, function(err, der) {
+																											if(err) {
+																												console.log(err);
+																											} else {
+																												console.log(der.data);
+																											}
+																										});
 																									}
 																								});
 																							}
