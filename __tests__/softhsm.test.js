@@ -165,8 +165,11 @@ test('Create a softhsm2, initialize slots, generate a private key, root ca, sign
                                     pkcs11: {
                                         modulePath: lib,
                                         pin: pin,
-                                        serial: softhsm.data['serial num'],
-                                        objectid: kpresult.data[0]['ID']
+                                        uri: openssl.common.encodePKCS11URI({
+                                            serial: softhsm.data['serial num'],
+                                            objectid: kpresult.data[0]['ID'],
+                                            type: 'private'
+                                        })
                                     }
                                 }, function(err, rootcacert) {
                                     expect(err).toEqual(false);
@@ -212,8 +215,11 @@ test('Create a softhsm2, initialize slots, generate a private key, root ca, sign
                                                             csr: csrcert.data,
                                                             options: csroptions,
                                                             pkcs11: {
-                                                                serial: softhsm.data['serial num'],
-                                                                objectid: kpresult.data[0]['ID'],
+                                                                uri: openssl.common.encodePKCS11URI({
+                                                                    serial: softhsm.data['serial num'],
+                                                                    objectid: kpresult.data[0]['ID'],
+                                                                    type: 'private'
+                                                                }),
                                                                 pin: pin,
                                                                 modulePath: lib
                                                             }
@@ -236,8 +242,11 @@ test('Create a softhsm2, initialize slots, generate a private key, root ca, sign
                                                                     crldays: 90,
                                                                     database: index,
                                                                     pkcs11: {
-                                                                        serial: softhsm.data['serial num'],
-                                                                        objectid: kpresult.data[0]['ID'],
+                                                                        uri: openssl.common.encodePKCS11URI({
+                                                                            serial: softhsm.data['serial num'],
+                                                                            objectid: kpresult.data[0]['ID'],
+                                                                            type: 'private'
+                                                                        }),
                                                                         pin: pin,
                                                                         modulePath: lib
                                                                     }

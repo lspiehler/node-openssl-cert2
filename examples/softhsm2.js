@@ -176,8 +176,11 @@ fs.stat(lib, function(err, stat) {
 													pkcs11: {
 														modulePath: lib,
 														pin: pin,
-														serial: softhsm.data['serial num'],
-														objectid: kpresult.data[0]['ID']
+														uri: openssl.common.encodePKCS11URI({
+															serial: softhsm.data['serial num'],
+															objectid: kpresult.data[0]['ID'],
+															type: 'private'
+														})
 													}
 												}, function(err, rootcacert) {
 													if(err) {
@@ -229,8 +232,11 @@ fs.stat(lib, function(err, stat) {
 																									csr: csrcert.data,
 																									options: csroptions,
 																									pkcs11: {
-																										serial: softhsm.data['serial num'],
-																										objectid: kpresult.data[0]['ID'],
+																										uri: openssl.common.encodePKCS11URI({
+																											serial: softhsm.data['serial num'],
+																											objectid: kpresult.data[0]['ID'],
+																											type: 'private'
+																										}),
 																										pin: pin,
 																										modulePath: lib
 																									}
@@ -259,8 +265,11 @@ fs.stat(lib, function(err, stat) {
 																													crldays: 90,
 																													database: index,
 																													pkcs11: {
-																														serial: softhsm.data['serial num'],
-																														objectid: kpresult.data[0]['ID'],
+																														uri: openssl.common.encodePKCS11URI({
+																															serial: softhsm.data['serial num'],
+																															objectid: kpresult.data[0]['ID'],
+																															type: 'private'
+																														}),
 																														pin: pin,
 																														modulePath: lib
 																													}
