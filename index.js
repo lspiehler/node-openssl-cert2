@@ -12,6 +12,7 @@ const smime = require("./lib/smime");
 const ocsp = require("./lib/ocsp");
 const providers = require("./lib/providers");
 const config = require("./lib/config");
+const common = require("./lib/common");
 
 var openssl = function(options) {
 
@@ -44,6 +45,7 @@ var openssl = function(options) {
 	this.smime = smime;
 	this.ocsp = ocsp;
 	this.providers = providers;
+	this.common = common;
 }
 
 module.exports = openssl;

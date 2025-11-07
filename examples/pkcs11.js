@@ -130,8 +130,11 @@ openssl.pkcs11.listSlots({modulePath: lib}, function(err, slots, cmd) {
                                                         csr: csrcert.data,
                                                         options: csroptions,
                                                         pkcs11: {
-                                                            serial: slots.data[0]['serial num'],
-                                                            objectid: objects.data[0]['ID'],
+                                                            uri: openssl.common.encodePKCS11URI({
+                                                                serial: slots.data[0]['serial num'],
+                                                                objectid: objects.data[0]['ID'],
+                                                                type: 'private'
+                                                            }),
                                                             pin: '123456',
                                                             modulePath: lib
                                                         }
@@ -165,8 +168,11 @@ openssl.pkcs11.listSlots({modulePath: lib}, function(err, slots, cmd) {
                                                                         crldays: 90,
                                                                         database: index,
                                                                         pkcs11: {
-                                                                            serial: slots.data[0]['serial num'],
-                                                                            objectid: objects.data[0]['ID'],
+                                                                            uri: openssl.common.encodePKCS11URI({
+                                                                                serial: slots.data[0]['serial num'],
+                                                                                objectid: objects.data[0]['ID'],
+                                                                                type: 'private'
+                                                                            }),
                                                                             pin: '123456',
                                                                             modulePath: lib
                                                                         }
@@ -179,8 +185,11 @@ openssl.pkcs11.listSlots({modulePath: lib}, function(err, slots, cmd) {
                                                                                 options: csroptions,
                                                                                 csr: csrcert.data,
                                                                                 pkcs11: {
-                                                                                    serial: slots.data[0]['serial num'],
-                                                                                    objectid: objects.data[0]['ID'],
+                                                                                    uri: openssl.common.encodePKCS11URI({
+                                                                                        serial: slots.data[0]['serial num'],
+                                                                                        objectid: objects.data[0]['ID'],
+                                                                                        type: 'private'
+                                                                                    }),
                                                                                     pin: '123456',
                                                                                     modulePath: lib
                                                                                 }
@@ -195,8 +204,11 @@ openssl.pkcs11.listSlots({modulePath: lib}, function(err, slots, cmd) {
                                                                                         cert: object.data,
                                                                                         data: 'this is my secret',
                                                                                         pkcs11: {
-                                                                                            serial: slots.data[0]['serial num'],
-                                                                                            objectid: objects.data[0]['ID'],
+                                                                                            uri: openssl.common.encodePKCS11URI({
+                                                                                                serial: slots.data[0]['serial num'],
+                                                                                                objectid: objects.data[0]['ID'],
+                                                                                                type: 'private'
+                                                                                            }),
                                                                                             pin: '123456',
                                                                                             modulePath: lib
                                                                                         }
