@@ -2,7 +2,8 @@ const node_openssl = require('../index.js');
 var openssl = new node_openssl({binpath: 'openssl', debug: false});
 
 // const lib = '/usr/lib/x86_64-linux-gnu/libykcs11.so';
-const lib = '/usr/local/lib/kms/libkmsp11.so';
+const lib = '/usr/lib/kms/libkmsp11.so';
+const objectindex = 2;
 // const lib = '/usr/lib/x86_64-linux-gnu/pkcs11-spy.so';
 
 var rootcacsroptions = {
@@ -122,25 +123,26 @@ openssl.pkcs11.listSlots({modulePath: lib}, function(err, slots, cmd) {
                 } else {
                     console.log(objects);
                     // console.log(process.env);
-                    openssl.pkcs11.readObject({
-                        modulePath: lib,
-                        slotid: slots.data[0].hexid,
-                        type: 'pubkey',
-                        objectid: objects.data[0]['ID']
-                    }, function(err, pubkey) {
-                        if(err) {
-                            console.log(err);
-                        } else {
-                            console.log(pubkey.data);
+                    // openssl.pkcs11.readObject({
+                    //     modulePath: lib,
+                    //     slotid: slots.data[0].hexid,
+                    //     type: 'pubkey',
+                    //     objectid: objects.data[objectindex]['ID']
+                    // }, function(err, pubkey) {
+                    //     if(err) {
+                    //         console.log(err);
+					// 		console.log(pubkey);
+                    //     } else {
+                    //         console.log(pubkey.data);
                             openssl.x509.selfSignCSR({
                                 options: rootcacsroptions,
                                 //csr: csr.data,
                                 pkcs11: {
-                                    modulePath: '/usr/lib/x86_64-linux-gnu/pkcs11-spy.so',
+                                    modulePath: lib,
                                     // pin: '123456',
                                     uri: openssl.common.encodePKCS11URI({
                                         serial: slots.data[0]['serial num'],
-                                        object: objects.data[0]['label'],
+                                        object: objects.data[objectindex]['label'],
                                         type: 'private'
                                     })
                                 }
@@ -170,11 +172,12 @@ openssl.pkcs11.listSlots({modulePath: lib}, function(err, slots, cmd) {
                                                             modulePath: lib,
                                                             uri: openssl.common.encodePKCS11URI({
                                                                 serial: slots.data[0]['serial num'],
-                                                                object: objects.data[0]['label'],
+                                                                objectid: objects.data[objectindex]['label'],
                                                                 type: 'private'
                                                             })
                                                         }
                                                     }, function(err, leafcert) {
+														console.log(leafcert);
                                                         if(err) {
                                                             console.log(err);
                                                             console.log(leafcert);
@@ -188,8 +191,8 @@ openssl.pkcs11.listSlots({modulePath: lib}, function(err, slots, cmd) {
                                     });
                                 }
                             });
-                        }
-                    });
+                    //     }
+                    // });
                 }
             });
         }
