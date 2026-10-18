@@ -53,7 +53,8 @@ test('Values with $, #, quotes and backslashes reach the certificate as they are
     const text = await opensslText('x509', signed.result.data);
     expect(text).not.toContain('EXPANDED');
     expect(text).toContain('DNS:' + literal);
-    expect(text).toContain('othername: UPN:' + literal);
+    // OpenSSL 3.0 prints "UPN::value", 3.5 "UPN:value"
+    expect(text.replace('othername: UPN::', 'othername: UPN:')).toContain('othername: UPN:' + literal);
     expect(text).toContain('URI:http://example.com/$ENV::CONFIGVALUESTEST#x');
     expect(text).toContain('URI:http://crl.example.com/$ENV::CONFIGVALUESTEST#x');
     expect(text).toContain('OCSP - URI:http://ocsp.example.com/$ENV::CONFIGVALUESTEST');
