@@ -57,13 +57,14 @@ function call(fn, params) {
     });
 }
 
-// CSRs are made by OpenSSL directly, as clients make them, with the string mask in a config file
-function opensslReq(args, mask) {
+// CSRs are made by OpenSSL directly, as clients make them, with the string mask in a config file;
+// names are given with -subj or, without prompt, as lines of the config file
+function opensslReq(args, mask, dnlines) {
     const tmp = require('tmp');
     const fs = require('fs');
     const dir = tmp.dirSync({unsafeCleanup: true});
     fs.writeFileSync(dir.name + '/key.pem', key);
-    fs.writeFileSync(dir.name + '/req.cnf', '[ req ]\ndistinguished_name = dn\nstring_mask = ' + (mask || 'utf8only') + '\n[ dn ]\n');
+    fs.writeFileSync(dir.name + '/req.cnf', '[ req ]\n' + (dnlines ? 'prompt = no\n' : '') + 'distinguished_name = dn\nstring_mask = ' + (mask || 'utf8only') + '\n[ dn ]\n' + (dnlines || []).join('\n') + '\n');
     return new Promise(function(resolve, reject) {
         execFile('openssl', ['req', '-new', '-key', dir.name + '/key.pem', '-config', dir.name + '/req.cnf', '-utf8'].concat(args), function(err, stdout) {
             dir.removeCallback();
@@ -101,16 +102,27 @@ for(let mask in masks) {
     }
 }
 
-test.each(cases)('%s %s values are parsed from the CSR and issued as they are', async (mask, attribute) => {
-    const expected = attributes[attribute].filter(masks[mask]);
+// Windows passes command line arguments in the system code page, so values with other characters go in the config file
+async function roundTrip(mask, attribute, expected) {
     const names = {};
     names[attribute] = expected;
-    let dn = expected.map(function(value) { return '/' + attribute + '=' + subj(value); }).join('');
     if(attribute != 'commonName') {
         names.commonName = 'fixed';
-        dn += '/commonName=fixed';
     }
-    const csr = await opensslReq(['-subj', dn], mask);
+    let csr;
+    if(expected.every(ascii)) {
+        let dn = '';
+        for(let name in names) {
+            dn += [].concat(names[name]).map(function(value) { return '/' + name + '=' + subj(value); }).join('');
+        }
+        csr = await opensslReq(['-subj', dn], mask);
+    } else {
+        let dnlines = [];
+        for(let name in names) {
+            dnlines = dnlines.concat([].concat(names[name]).map(function(value, i) { return i + '.' + name + ' = ' + value; }));
+        }
+        csr = await opensslReq([], mask, dnlines);
+    }
     const parsed = await call(openssl.csr.parse, {csr: csr});
     expect(parsed.err).toEqual(false);
     expect(parsed.result.data.subject[attribute]).toEqual(expected.length == 1 ? expected[0] : expected);
@@ -123,6 +135,14 @@ test.each(cases)('%s %s values are parsed from the CSR and issued as they are', 
     const cert = await call(openssl.x509.parse, {cert: signed.result.data});
     expect(cert.err).toEqual(false);
     expect(cert.result.data.subject).toEqual(parsed.result.data.subject);
+}
+
+test.each(cases)('%s %s values are parsed from the CSR and issued as they are', async (mask, attribute) => {
+    const expected = attributes[attribute].filter(masks[mask]);
+    await roundTrip(mask, attribute, expected.filter(ascii));
+    if(!expected.every(ascii)) {
+        await roundTrip(mask, attribute, expected.filter(function(value) { return !ascii(value); }));
+    }
 }, 30000);
 
 test('Issuer and Subject String are printed as before, without the escapes used for parsing', async () => {
