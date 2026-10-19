@@ -114,3 +114,12 @@ test('csr.create writes a subject list in its order', async () => {
     const parsed = await call(openssl.csr.parse, {csr: csr.result.data});
     expect(parsed.result.data.subjectList).toEqual(list);
 });
+
+test('selfSignCSR issues a subject list in its order', async () => {
+    const list = [{type: 'domainComponent', value: 'com'}, {type: 'domainComponent', value: 'example'}, {type: 'commonName', value: 'Self Signed'}, {type: 'organizationName', value: 'Org'}];
+    const csr = await call(openssl.csr.create, {options: {subject: list}, key: key});
+    const signed = await call(openssl.x509.selfSignCSR, {options: {days: 1, subject: list}, csr: csr.result.data, key: key});
+    expect(signed.err).toEqual(false);
+    const cert = await call(openssl.x509.parse, {cert: signed.result.data});
+    expect(cert.result.data.subjectList).toEqual(list);
+});

@@ -83,6 +83,26 @@ test('Control characters, which would start new config lines, are rejected', asy
     expect(san.err).toEqual('Invalid control character in options.extensions.SANs.DNS.0');
 });
 
+test('A subject list keeps $, #, quotes and backslashes as they are', async () => {
+    const key = await call(openssl.keypair.generateECC, {curve: 'prime256v1'});
+    const csr = await call(openssl.csr.create, {
+        options: {subject: [{type: 'organizationalUnitName', value: '$ENV::CONFIGVALUESTEST'}, {type: 'commonName', value: literal}]},
+        key: key.result.data
+    });
+    expect(csr.err).toEqual(false);
+    const text = await opensslText('req', csr.result.data);
+    expect(text).not.toContain('EXPANDED');
+    expect(text).toContain('Subject: OU=$ENV::CONFIGVALUESTEST,CN=' + literal);
+});
+
+test('Control characters in a subject list are rejected', async () => {
+    const key = await call(openssl.keypair.generateECC, {curve: 'prime256v1'});
+    const subject = await call(openssl.csr.create, {options: {subject: [{type: 'commonName', value: 'a\r\n[ req_ext ]\r\nbasicConstraints = CA:true'}]}, key: key.result.data});
+    expect(subject.err).toEqual('Invalid control character in options.subject.0.value');
+    const signed = await signedWith({days: 1, subject: [{type: 'commonName', value: 'leaf'}, {type: 'organizationName', value: 'a\nb'}], preserveDN: true});
+    expect(signed.err).toEqual('Invalid control character in options.subject.1.value');
+});
+
 test('A hash that is not a plain name is rejected', async () => {
     const signed = await signedWith({days: 1, hash: 'sha256$ENV::CONFIGVALUESTEST'});
     expect(signed.err).toEqual('Invalid hash: sha256$ENV::CONFIGVALUESTEST');
