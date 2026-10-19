@@ -55,7 +55,8 @@ const policyOrder = [
     ['/CN=user/DC=com/DC=example', ['domainComponent=com', 'domainComponent=example', 'commonName=user']],
     ['/CN=Jane Doe/emailAddress=jane@example.com/SN=Doe/GN=Jane', ['surname=Doe', 'givenName=Jane', 'commonName=Jane Doe', 'emailAddress=jane@example.com']],
     ['/CN=host/C=US/L=City/ST=State/O=Org/OU=Unit', ['countryName=US', 'stateOrProvinceName=State', 'localityName=City', 'organizationName=Org', 'organizationalUnitName=Unit', 'commonName=host']],
-    ['/OU=a/O=b/OU=c/CN=x', ['organizationName=b', 'organizationalUnitName=a', 'organizationalUnitName=c', 'commonName=x']]
+    ['/OU=a/O=b/OU=c/CN=x', ['organizationName=b', 'organizationalUnitName=a', 'organizationalUnitName=c', 'commonName=x']],
+    ['/unstructuredAddress=192.0.2.1/unstructuredName=router.example.com/organizationIdentifier=VATDE-123456789/CN=x/O=Org', ['organizationName=Org', 'commonName=x', 'organizationIdentifier=VATDE-123456789', 'unstructuredName=router.example.com', 'unstructuredAddress=192.0.2.1']]
 ];
 
 test.each(policyOrder)('%s is issued in the Baseline Requirements order by default', async (dn, expected) => {
@@ -95,15 +96,15 @@ test('The subject list is in encoded order and matches the subject object', asyn
 
 test('A subject list with an unknown attribute type is refused', async () => {
     const csr = await opensslReq('/CN=x');
-    const signed = await call(openssl.x509.CASignCSR, {csr: csr, ca: ca, key: key, options: {days: 1, subject: [{type: 'commonName', value: 'x'}, {type: 'organizationIdentifier', value: 'VATDE-1'}]}});
-    expect(signed.err).toEqual('Invalid subject: organizationIdentifier');
+    const signed = await call(openssl.x509.CASignCSR, {csr: csr, ca: ca, key: key, options: {days: 1, subject: [{type: 'commonName', value: 'x'}, {type: 'name', value: 'n'}]}});
+    expect(signed.err).toEqual('Invalid subject: name');
     expect(openssl.x509.getDistinguishedName([{type: 'commonName'}])).toEqual(false);
     expect(openssl.x509.getDistinguishedName([])).toEqual('/');
 });
 
 test('An empty subject list is null and unknown names are kept as printed', () => {
     expect(openssl.x509.getSubjectList('        Subject: \n')).toEqual(null);
-    expect(openssl.x509.getSubjectList('        Subject: organizationIdentifier=VATDE-1, CN=c\n')).toEqual([{type: 'organizationIdentifier', value: 'VATDE-1'}, {type: 'commonName', value: 'c'}]);
+    expect(openssl.x509.getSubjectList('        Subject: name=n, CN=c\n')).toEqual([{type: 'name', value: 'n'}, {type: 'commonName', value: 'c'}]);
 });
 
 test('csr.create writes a subject list in its order', async () => {
