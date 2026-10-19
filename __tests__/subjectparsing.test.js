@@ -39,7 +39,10 @@ const attributes = {
     initials: values,
     generationQualifier: values,
     dnQualifier: values.filter(printable),
-    pseudonym: values
+    pseudonym: values,
+    organizationIdentifier: values,
+    unstructuredName: values,
+    unstructuredAddress: values
 }
 
 // UTF8String, PrintableString/T61String (Latin-1 only) and BMPString (as Windows writes them; no characters outside the BMP)
@@ -181,5 +184,5 @@ test('Only the Subject line of the certificate itself is parsed', () => {
 });
 
 test('Attributes without a known name keep the name OpenSSL prints', () => {
-    expect(openssl.x509.getSubject('        Subject: organizationIdentifier=VATDE-1, 1.2.3.4=x, CN=c\n')).toEqual({organizationIdentifier: 'VATDE-1', '1.2.3.4': 'x', commonName: 'c'});
+    expect(openssl.x509.getSubject('        Subject: name=n, 1.2.3.4=x, CN=c\n')).toEqual({name: 'n', '1.2.3.4': 'x', commonName: 'c'});
 });
