@@ -108,6 +108,12 @@ var csroptions = {
 	}
 }
 
+//pkcs11-tool prints the subject in OpenSSL's order with OpenSC 0.25 ("CN=Test Root CA,C=US") and in the
+//certificate's order with OpenSC 0.27 (Ubuntu 26.04: "C=US, CN=Test Root CA"), so compare the parts
+const subjectParts = function(subject) {
+	return subject.split(/,\s*/).sort();
+}
+
 const deleteTestSlotIfExists = function(slots, callback) {
 	let foundtestslot = -1;
 	for(let i = 0; i < slots.data.length; i++) {
@@ -190,7 +196,7 @@ test('Create a softhsm2, initialize slots, generate a private key, root ca, sign
                                             expect(err).toEqual(false);
                                             //console.log(caparse.data.attributes['Subject String']);
                                             //console.log(importedcert.data[0]['subject']);
-                                            expect(caparse.data.attributes['Subject String']).toBe(importedcert.data[0]['subject']);
+                                            expect(subjectParts(caparse.data.attributes['Subject String'])).toEqual(subjectParts(importedcert.data[0]['subject']));
                                             openssl.pkcs11.listObjects({
                                                 modulePath: lib,
                                                 slotid: softhsm.data.hexid
@@ -203,7 +209,7 @@ test('Create a softhsm2, initialize slots, generate a private key, root ca, sign
                                                         break;
                                                     }
                                                 }
-                                                expect(caparse.data.attributes['Subject String']).toBe(certobject['subject']);
+                                                expect(subjectParts(caparse.data.attributes['Subject String'])).toEqual(subjectParts(certobject['subject']));
                                                 openssl.keypair.generateRSA({}, function(err, rsacert) {
                                                     expect(err).toEqual(false);
                                                     expect(rsacert.data.split('\n')[0].trim()).toBe("-----BEGIN PRIVATE KEY-----")
