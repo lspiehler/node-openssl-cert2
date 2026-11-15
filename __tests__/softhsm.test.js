@@ -277,3 +277,66 @@ test('Create a softhsm2, initialize slots, generate a private key, root ca, sign
         }
     });
 });
+
+//a fresh token with one key and a certificate the key signed: the PKCS#11 parameters, and the certificate
+//for the key's public key
+const newTestKey = function(keytype, callback) {
+    openssl.pkcs11.listSlots({modulePath: lib}, function(err, slots) {
+        expect(err).toEqual(false);
+        deleteTestSlotIfExists(slots, function(err, result) {
+            expect(err).toEqual(false);
+            openssl.softhsm2.createSlot({modulePath: lib, label: label, pin: pin, sopin: pin}, function(err, softhsm) {
+                expect(err).toEqual(false);
+                openssl.pkcs11.generateKeyPair({
+                    modulePath: lib,
+                    label: label,
+                    slotid: softhsm.data.hexid,
+                    objectid: '01',
+                    keytype: keytype,
+                    pin: pin,
+                    loginType: "User",
+                    serial: softhsm.data['serial num'],
+                    signpin: pin
+                }, function(err, kpresult) {
+                    expect(err).toEqual(false);
+                    let pkcs11 = {
+                        modulePath: lib,
+                        pin: pin,
+                        uri: openssl.common.encodePKCS11URI({
+                            serial: softhsm.data['serial num'],
+                            objectid: '01',
+                            type: 'private'
+                        })
+                    }
+                    openssl.x509.selfSignCSR({
+                        options: {hash: 'sha256', days: 1, subject: {commonName: ['softhsm2 test key']}},
+                        pkcs11: pkcs11
+                    }, function(err, cert) {
+                        expect(err).toEqual(false);
+                        callback(pkcs11, cert.data);
+                    });
+                });
+            });
+        });
+    });
+}
+
+//smime.sign loads the pkcs11 provider on the command line, so it gets SoftHSM's no-deinit quirk through OPENSSL_CONF
+//(lib/config/pkcs11ModuleQuirks.js). On Ubuntu 24.04 (OpenSSL 3.0.13, pkcs11-provider 0.3) openssl cms -sign with
+//SoftHSM hangs with or without the quirk, so this test times out there; CI runs Ubuntu 26.04, where it passes.
+test('Sign CMS with a key on a softhsm2 token', done => {
+    fs.stat(lib, function(err, stat) {
+        if(err) {
+            done();
+            return;
+        }
+        newTestKey('EC:prime256v1', function(pkcs11, cert) {
+            openssl.smime.sign({data: 'signed on a token', cert: cert, pkcs11: pkcs11}, function(err, signed) {
+                expect(err).toEqual(false);
+                expect(signed.data).toContain('-----BEGIN CMS-----');
+                expect(signed.command[0]).not.toContain(pin);
+                done();
+            });
+        });
+    });
+}, 60000);
