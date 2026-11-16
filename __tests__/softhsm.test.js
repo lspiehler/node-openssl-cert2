@@ -348,3 +348,32 @@ test('Sign CMS with a key on a softhsm2 token', done => {
         });
     });
 }, 60000);
+
+//signTBS loads the pkcs11 provider on the command line, like smime.sign, and gets SoftHSM's quirk the same way
+test('Sign TBS bytes with RSA and ECDSA keys on a softhsm2 token', done => {
+    fs.stat(lib, function(err, stat) {
+        if(err) {
+            done();
+            return;
+        }
+        const crypto = require('crypto');
+        const tbs = crypto.randomBytes(300);
+        let keytypes = ['rsa:2048', 'EC:prime256v1'];
+        let signNext = function(index) {
+            if(index > keytypes.length - 1) {
+                done();
+                return;
+            }
+            newTestKey(keytypes[index], function(pkcs11, cert) {
+                openssl.x509.signTBS({data: tbs, hash: 'sha256', pkcs11: pkcs11}, function(err, signature) {
+                    expect(err).toEqual(false);
+                    expect(crypto.verify('sha256', tbs, new crypto.X509Certificate(cert).publicKey, signature.data)).toBe(true);
+                    expect(signature.command[0]).toContain('-passin pass:hidden');
+                    expect(signature.command[0]).not.toContain(pin);
+                    signNext(index + 1);
+                });
+            });
+        }
+        signNext(0);
+    });
+}, 60000);
