@@ -8,6 +8,8 @@ const lib = '/usr/lib/softhsm/libsofthsm2.so';
 
 test('Only SoftHSM gets the no-deinit quirk', () => {
     expect(config.pkcs11ModuleQuirks.lines(lib)).toEqual(['pkcs11-module-quirks = no-deinit']);
+    expect(config.pkcs11ModuleQuirks.lines('/usr/lib/softhsm/libsofthsm2.so.2')).toEqual(['pkcs11-module-quirks = no-deinit']);
+    expect(config.pkcs11ModuleQuirks.lines('/usr/lib/softhsm/libsofthsm2.something.so')).toEqual([]);
     expect(config.pkcs11ModuleQuirks.lines('/usr/lib/x86_64-linux-gnu/libykcs11.so')).toEqual([]);
     expect(config.pkcs11ModuleQuirks.lines('/usr/local/lib/libkmsp11.so')).toEqual([]);
     expect(config.pkcs11ModuleQuirks.providerConfig('/usr/lib/x86_64-linux-gnu/opensc-pkcs11.so')).toBe(false);
@@ -20,6 +22,8 @@ test('The provider config for SoftHSM gives the quirk without activating the pro
     //-provider pkcs11 activates it, with the module from PKCS11_PROVIDER_MODULE
     expect(conf).not.toContain('activate');
     expect(conf).not.toContain('pkcs11-module-path');
+    //OpenSSL finds the provider file by name, wherever the system keeps it
+    expect(conf).not.toMatch(/^module/m);
 });
 
 test('A generated config gives SoftHSM the quirk, other modules none', done => {
