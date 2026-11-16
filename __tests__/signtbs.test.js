@@ -69,4 +69,17 @@ test('Signing TBS bytes with the wrong password fails without a signature', done
     });
 });
 
+test('signTBS refuses a hash that is not a digest name, and missing data, without running openssl', done => {
+    let ecc = keypair('ec', {namedCurve: 'P-256'}, false);
+    openssl.x509.signTBS({data: tbs, key: ecc.key, hash: 'sha256 -out /tmp/leak.bin'}, function(err, signature) {
+        expect(err).toBe('Invalid hash: sha256 -out /tmp/leak.bin');
+        expect(signature).toEqual({command: [], data: false});
+        openssl.x509.signTBS({key: ecc.key, hash: 'sha256'}, function(err, signature) {
+            expect(err).toMatch(/^Invalid data/);
+            expect(signature).toEqual({command: [], data: false});
+            done();
+        });
+    });
+});
+
 //signing with a key on a token is tested in softhsm.test.js, whose tests run one after another on one token store
