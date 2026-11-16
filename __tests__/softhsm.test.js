@@ -108,6 +108,12 @@ var csroptions = {
 	}
 }
 
+//pkcs11-tool prints the subject in OpenSSL's order with OpenSC 0.25 ("CN=Test Root CA,C=US") and in the
+//certificate's order with OpenSC 0.27 (Ubuntu 26.04: "C=US, CN=Test Root CA"), so compare the parts
+const subjectParts = function(subject) {
+	return subject.split(/,\s*/).sort();
+}
+
 const deleteTestSlotIfExists = function(slots, callback) {
 	let foundtestslot = -1;
 	for(let i = 0; i < slots.data.length; i++) {
@@ -190,7 +196,7 @@ test('Create a softhsm2, initialize slots, generate a private key, root ca, sign
                                             expect(err).toEqual(false);
                                             //console.log(caparse.data.attributes['Subject String']);
                                             //console.log(importedcert.data[0]['subject']);
-                                            expect(caparse.data.attributes['Subject String']).toBe(importedcert.data[0]['subject']);
+                                            expect(subjectParts(caparse.data.attributes['Subject String'])).toEqual(subjectParts(importedcert.data[0]['subject']));
                                             openssl.pkcs11.listObjects({
                                                 modulePath: lib,
                                                 slotid: softhsm.data.hexid
@@ -203,7 +209,7 @@ test('Create a softhsm2, initialize slots, generate a private key, root ca, sign
                                                         break;
                                                     }
                                                 }
-                                                expect(caparse.data.attributes['Subject String']).toBe(certobject['subject']);
+                                                expect(subjectParts(caparse.data.attributes['Subject String'])).toEqual(subjectParts(certobject['subject']));
                                                 openssl.keypair.generateRSA({}, function(err, rsacert) {
                                                     expect(err).toEqual(false);
                                                     expect(rsacert.data.split('\n')[0].trim()).toBe("-----BEGIN PRIVATE KEY-----")
@@ -271,3 +277,74 @@ test('Create a softhsm2, initialize slots, generate a private key, root ca, sign
         }
     });
 });
+
+//a fresh token with one key and a certificate the key signed: the PKCS#11 parameters, and the certificate
+//for the key's public key
+const newTestKey = function(keytype, callback) {
+    openssl.pkcs11.listSlots({modulePath: lib}, function(err, slots) {
+        expect(err).toEqual(false);
+        deleteTestSlotIfExists(slots, function(err, result) {
+            expect(err).toEqual(false);
+            openssl.softhsm2.createSlot({modulePath: lib, label: label, pin: pin, sopin: pin}, function(err, softhsm) {
+                expect(err).toEqual(false);
+                openssl.pkcs11.generateKeyPair({
+                    modulePath: lib,
+                    label: label,
+                    slotid: softhsm.data.hexid,
+                    objectid: '01',
+                    keytype: keytype,
+                    pin: pin,
+                    loginType: "User",
+                    serial: softhsm.data['serial num'],
+                    signpin: pin
+                }, function(err, kpresult) {
+                    expect(err).toEqual(false);
+                    let pkcs11 = {
+                        modulePath: lib,
+                        pin: pin,
+                        uri: openssl.common.encodePKCS11URI({
+                            serial: softhsm.data['serial num'],
+                            objectid: '01',
+                            type: 'private'
+                        })
+                    }
+                    openssl.x509.selfSignCSR({
+                        options: {hash: 'sha256', days: 1, subject: {commonName: ['softhsm2 test key']}},
+                        pkcs11: pkcs11
+                    }, function(err, cert) {
+                        expect(err).toEqual(false);
+                        callback(pkcs11, cert.data);
+                    });
+                });
+            });
+        });
+    });
+}
+
+//smime.sign loads the pkcs11 provider on the command line, so it gets SoftHSM's no-deinit quirk through OPENSSL_CONF
+//(lib/config/pkcs11ModuleQuirks.js). On Ubuntu 24.04 (OpenSSL 3.0.13, pkcs11-provider 0.3) openssl cms -sign with
+//SoftHSM hangs with or without the quirk (not a regression: it hangs on master too), so it is skipped on OpenSSL 3.0
+//rather than waiting for the timeout; CI runs Ubuntu 26.04 (OpenSSL 3.5), where it runs.
+test('Sign CMS with a key on a softhsm2 token', done => {
+    fs.stat(lib, function(err, stat) {
+        if(err) {
+            done();
+            return;
+        }
+        openssl.binary.openssl.getVersion(function(err, version) {
+            expect(err).toEqual(false);
+            if(version.indexOf('3.0.') == 0) {
+                done();
+                return;
+            }
+            newTestKey('EC:prime256v1', function(pkcs11, cert) {
+                openssl.smime.sign({data: 'signed on a token', cert: cert, pkcs11: pkcs11}, function(err, signed) {
+                    expect(err).toEqual(false);
+                    expect(signed.data).toContain('-----BEGIN CMS-----');
+                    expect(signed.command[0]).not.toContain(pin);
+                    done();
+                });
+            });
+        });
+    });
+}, 60000);
